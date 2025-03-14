@@ -4,6 +4,7 @@
 static const mp_rom_map_elem_t module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_mp_dl) },
     { MP_ROM_QSTR(MP_QSTR_FaceDetector), MP_ROM_PTR(&mp_face_detector_type) },
+    { MP_ROM_QSTR(MP_QSTR_ImageNet), MP_ROM_PTR(&mp_image_net_type) },
 };
 static MP_DEFINE_CONST_DICT(module_globals, module_globals_table);
 

@@ -1,13 +1,14 @@
-add_library(usermod_mp_face_detect INTERFACE)
+add_library(usermod_mp_esp_dl INTERFACE)
 
-add_dependencies(usermod_mp_face_detect human_face_detect)
+add_dependencies(usermod_mp_esp_dl human_face_detect)
 
-target_sources(usermod_mp_face_detect INTERFACE
+target_sources(usermod_mp_esp_dl INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/esp_face_detector.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/esp_image_net.cpp
     ${CMAKE_CURRENT_LIST_DIR}/esp_mp_dl_module.c
 )
 
-target_include_directories(usermod_mp_face_detect INTERFACE
+target_include_directories(usermod_mp_esp_dl INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}
 )
 
@@ -27,4 +28,4 @@ else()
     message(WARNING "MP_JPEG_SRC not found or not defined!")
 endif()
 
-target_link_libraries(usermod INTERFACE usermod_mp_face_detect)
+target_link_libraries(usermod INTERFACE usermod_mp_esp_dl)
