@@ -56,7 +56,7 @@ jobs:
           # git clone --depth 1 --branch ${{ env.MPY_RELEASE }} https://github.com/micropython/micropython.git
           git clone --depth 1 --branch mp-dl https://github.com/cnadler86/micropython.git
           cd micropython
-          git submodule update --init --depth 1
+          # git submodule update --init --depth 1
           cd mpy-cross && make
           cd ~/micropython/ports/esp32 && make submodules
 
@@ -110,7 +110,7 @@ jobs:
           
           IFS='-' read -r BOARD_NAME BOARD_VARIANT <<< "${{ matrix.board }}"
           if [ -n "${BOARD_VARIANT}" ]; then
-            IDF_CMD="idf.py -D MICROPY_BOARD=$BOARD_NAME -D USER_C_MODULES=${{ github.workspace }}/src/micropython.cmake -D MICROPY_BOARD_VARIANT=$BOARD_VARIANT -B build-$BOARD_NAME"
+            IDF_CMD="idf.py -D MICROPY_BOARD=$BOARD_NAME -D MICROPY_BOARD_VARIANT=$BOARD_VARIANT -D USER_C_MODULES=${{ github.workspace }}/src/micropython.cmake -B build-$BOARD_NAME"
           else
             IDF_CMD="idf.py -D MICROPY_BOARD=$BOARD_NAME -D USER_C_MODULES=${{ github.workspace }}/src/micropython.cmake -B build-$BOARD_NAME"
           fi
