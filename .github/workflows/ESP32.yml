@@ -56,9 +56,9 @@ jobs:
           # git clone --depth 1 --branch ${{ env.MPY_RELEASE }} https://github.com/micropython/micropython.git
           git clone --depth 1 --branch mp-dl https://github.com/cnadler86/micropython.git
           cd micropython
-          # git submodule update --init --depth 1
+          git submodule update --init --depth 1
           cd mpy-cross && make
-          cd ~/micropython/ports/esp32 && make submodules
+          # cd ~/micropython/ports/esp32 && make submodules
 
       - name: Set up ESP-IDF
         if: steps.cache_esp_idf.outputs.cache-hit != 'true'
