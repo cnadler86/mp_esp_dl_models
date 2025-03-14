@@ -72,7 +72,7 @@ static mp_obj_t image_net_detect(mp_obj_t self_in, mp_obj_t framebuffer_obj) {
 
     mp_obj_t list = mp_obj_new_list(0, NULL);
     for (const auto &res : detect_results) {
-        mp_obj_list_append(list, mp_obj_new_str_from_cstr(rew.cat_name));
+        mp_obj_list_append(list, mp_obj_new_str_from_cstr(res.cat_name));
         mp_obj_list_append(list, mp_obj_new_float(res.score));
     }
     return list;
