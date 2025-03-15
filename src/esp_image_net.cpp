@@ -3,7 +3,7 @@
 #include "imagenet_cls.hpp"
 #include <memory>
 
-namespace mp_dl::detector {
+namespace mp_dl::imagenet {
 
 // Object
 struct MP_ImageNetCls {
@@ -94,7 +94,7 @@ MP_DEFINE_CONST_OBJ_TYPE(
     mp_image_net_type,
     MP_QSTR_ImageNet,
     MP_TYPE_FLAG_NONE,
-    make_new, (const void *)mp_dl::detector::image_net_make_new,
-    print, (const void *)mp_dl::detector::print,
-    locals_dict, &mp_dl::detector::image_net_locals_dict
+    make_new, (const void *)mp_dl::imagenet::image_net_make_new,
+    print, (const void *)mp_dl::imagenet::print,
+    locals_dict, &mp_dl::imagenet::image_net_locals_dict
 );
