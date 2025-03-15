@@ -110,7 +110,7 @@ jobs:
           
           IFS='-' read -r BOARD_NAME BOARD_VARIANT <<< "${{ matrix.board }}"
 
-          IDF_CMD="idf.py -D MICROPY_BOARD_DIR=${{ github.workspace }}/boards/ -D MICROPY_BOARD=$BOARD_NAME -D USER_C_MODULES=${{ github.workspace }}/src/micropython.cmake -B build-$BOARD_NAME"
+          IDF_CMD="idf.py -D MICROPY_BOARD_DIR=${{ github.workspace }}/boards -D MICROPY_BOARD=$BOARD_NAME -D USER_C_MODULES=${{ github.workspace }}/src/micropython.cmake -B build-$BOARD_NAME"
           if [ -n "${BOARD_VARIANT}" ]; then
               IDF_CMD="$IDF_CMD -D MICROPY_BOARD_VARIANT=$BOARD_VARIANT"
           fi
