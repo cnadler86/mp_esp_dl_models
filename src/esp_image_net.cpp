@@ -10,17 +10,14 @@ struct MP_ImageNetCls {
     mp_obj_base_t base;
     std::shared_ptr<ImageNetCls> model = nullptr;
     dl::image::img_t img;
-    bool return_features;
 };
 
 // Constructor
 static mp_obj_t image_net_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args) {
-    enum { ARG_img_width, ARG_img_height, ARG_return_features, ARG_model };
+    enum { ARG_img_width, ARG_img_height };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_width, MP_ARG_INT, {.u_int = 320} },
         { MP_QSTR_height, MP_ARG_INT, {.u_int = 240} },
-        { MP_QSTR_features, MP_ARG_BOOL, {.u_bool = false} },
-        { MP_QSTR_model, MP_ARG_INT, {.u_int = 0} },
     };
 
     mp_arg_val_t parsed_args[MP_ARRAY_SIZE(allowed_args)];
@@ -37,8 +34,6 @@ static mp_obj_t image_net_make_new(const mp_obj_type_t *type, size_t n_args, siz
     self->img.height = parsed_args[ARG_img_height].u_int;
     self->img.pix_type = dl::image::DL_IMAGE_PIX_TYPE_RGB888;
     self->img.data = nullptr;
-
-    self->return_features = parsed_args[ARG_return_features].u_bool;
 
     return MP_OBJ_FROM_PTR(self);
 }

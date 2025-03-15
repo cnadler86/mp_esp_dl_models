@@ -15,12 +15,11 @@ struct MP_FaceDetector {
 
 // Constructor
 static mp_obj_t face_detector_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args) {
-    enum { ARG_img_width, ARG_img_height, ARG_return_features, ARG_model };
+    enum { ARG_img_width, ARG_img_height, ARG_return_features };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_width, MP_ARG_INT, {.u_int = 320} },
         { MP_QSTR_height, MP_ARG_INT, {.u_int = 240} },
         { MP_QSTR_features, MP_ARG_BOOL, {.u_bool = false} },
-        { MP_QSTR_model, MP_ARG_INT, {.u_int = 0} },
     };
 
     mp_arg_val_t parsed_args[MP_ARRAY_SIZE(allowed_args)];
@@ -72,24 +71,19 @@ static mp_obj_t face_detector_detect(mp_obj_t self_in, mp_obj_t framebuffer_obj)
 
     mp_obj_t list = mp_obj_new_list(0, NULL);
     for (const auto &res : detect_results) {
-        mp_obj_t dict = mp_obj_new_dict(0);
-        mp_obj_dict_store(dict, mp_obj_new_str("score", 5), mp_obj_new_float(res.score));
-        mp_obj_dict_store(dict, mp_obj_new_str("x1", 2), mp_obj_new_int(res.box[0]));
-        mp_obj_dict_store(dict, mp_obj_new_str("y1", 2), mp_obj_new_int(res.box[1]));
-        mp_obj_dict_store(dict, mp_obj_new_str("x2", 2), mp_obj_new_int(res.box[2]));
-        mp_obj_dict_store(dict, mp_obj_new_str("y2", 2), mp_obj_new_int(res.box[3]));
-
-        if (self->return_features) {
-            mp_obj_t features_dict = mp_obj_new_dict(0);
-            mp_obj_dict_store(features_dict, mp_obj_new_str("left_eye", 9), mp_obj_new_tuple(2, (mp_obj_t[]){mp_obj_new_int(res.keypoint[0]), mp_obj_new_int(res.keypoint[1])}));
-            mp_obj_dict_store(features_dict, mp_obj_new_str("right_eye", 10), mp_obj_new_tuple(2, (mp_obj_t[]){mp_obj_new_int(res.keypoint[2]), mp_obj_new_int(res.keypoint[3])}));
-            mp_obj_dict_store(features_dict, mp_obj_new_str("nose", 4), mp_obj_new_tuple(2, (mp_obj_t[]){mp_obj_new_int(res.keypoint[4]), mp_obj_new_int(res.keypoint[5])}));
-            mp_obj_dict_store(features_dict, mp_obj_new_str("left_mouth", 11), mp_obj_new_tuple(2, (mp_obj_t[]){mp_obj_new_int(res.keypoint[6]), mp_obj_new_int(res.keypoint[7])}));
-            mp_obj_dict_store(features_dict, mp_obj_new_str("right_mouth", 12), mp_obj_new_tuple(2, (mp_obj_t[]){mp_obj_new_int(res.keypoint[8]), mp_obj_new_int(res.keypoint[9])}));
-            mp_obj_dict_store(dict, mp_obj_new_str("features", 8), features_dict);
+        mp_obj_t tuple[4];
+        for (int i = 0; i < 4; ++i) {
+            tuple[i] = mp_obj_new_int(res.box[i]);
         }
-
-        mp_obj_list_append(list, dict);
+        mp_obj_list_append(list, mp_obj_new_tuple(4, tuple));
+    
+        if (self->return_features) {
+            mp_obj_t features[10];
+            for (int i = 0; i < 10; ++i) {
+                features[i] = mp_obj_new_int(res.keypoint[i]);
+            }
+            mp_obj_list_append(list, mp_obj_new_tuple(10, features));
+        }
     }
     return list;
 }
