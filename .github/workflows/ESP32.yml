@@ -136,5 +136,5 @@ jobs:
         with:
           name: build-logs-${{ matrix.board }}
           path: |
-            ~/micropython/ports/esp32/build-${{ matrix.board }}/log/
+            ~/micropython/ports/esp32/build-$BOARD_NAME/log/
           retention-days: 5
