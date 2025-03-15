@@ -53,8 +53,8 @@ jobs:
         if: steps.cache_esp_idf.outputs.cache-hit != 'true'
         run: |
           cd ~
-          # git clone --depth 1 --branch ${{ env.MPY_RELEASE }} https://github.com/micropython/micropython.git
-          git clone --depth 1 --branch mp-dl https://github.com/cnadler86/micropython.git
+          git clone --depth 1 --branch ${{ env.MPY_RELEASE }} https://github.com/micropython/micropython.git
+          # git clone --depth 1 --branch mp-dl https://github.com/cnadler86/micropython.git
           cd micropython
           git submodule update --init --depth 1
           cd mpy-cross && make
@@ -109,10 +109,10 @@ jobs:
           source ~/esp-idf/export.sh
           
           IFS='-' read -r BOARD_NAME BOARD_VARIANT <<< "${{ matrix.board }}"
+
+          IDF_CMD="idf.py -D MICROPY_BOARD_DIR=/boards/ -D MICROPY_BOARD=$BOARD_NAME -D USER_C_MODULES=${{ github.workspace }}/src/micropython.cmake -B build-$BOARD_NAME"
           if [ -n "${BOARD_VARIANT}" ]; then
-            IDF_CMD="idf.py -D MICROPY_BOARD=$BOARD_NAME -D MICROPY_BOARD_VARIANT=$BOARD_VARIANT -D USER_C_MODULES=${{ github.workspace }}/src/micropython.cmake -B build-$BOARD_NAME"
-          else
-            IDF_CMD="idf.py -D MICROPY_BOARD=$BOARD_NAME -D USER_C_MODULES=${{ github.workspace }}/src/micropython.cmake -B build-$BOARD_NAME"
+              IDF_CMD="$IDF_CMD -D MICROPY_BOARD_VARIANT=$BOARD_VARIANT"
           fi
           make BOARD=$BOARD_NAME submodules
           eval "$IDF_CMD build"

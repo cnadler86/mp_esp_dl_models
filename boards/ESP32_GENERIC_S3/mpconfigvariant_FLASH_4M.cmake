@@ -1,0 +1,8 @@
+set(SDKCONFIG_DEFAULTS
+    ${SDKCONFIG_DEFAULTS}
+    /oards/ESP32_GENERIC_S3/sdkconfig.flash_4m
+)
+
+list(APPEND MICROPY_DEF_BOARD
+    MICROPY_HW_BOARD_NAME="Generic ESP32S3 module 4MB flash"
+)
