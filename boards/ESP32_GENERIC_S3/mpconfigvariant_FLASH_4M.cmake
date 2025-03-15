@@ -1,6 +1,6 @@
 set(SDKCONFIG_DEFAULTS
     ${SDKCONFIG_DEFAULTS}
-    /oards/ESP32_GENERIC_S3/sdkconfig.flash_4m
+    /boards/ESP32_GENERIC_S3/sdkconfig.flash_4m
 )
 
 list(APPEND MICROPY_DEF_BOARD
