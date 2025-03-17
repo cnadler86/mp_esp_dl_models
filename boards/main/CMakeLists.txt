@@ -1,4 +1,5 @@
-set(PROJECT_DIR ${MICROPY_PORT_DIR})
+get_property(PROJECT_DIR GLOBAL PROPERTY source_list_property)
+# set(PROJECT_DIR ${MICROPY_PORT_DIR})
 if(EXISTS ${PROJECT_DIR}/main_esp32s3/CMakeLists.txt)
     include(${PROJECT_DIR}/main_esp32s3/CMakeLists.txt)
 elseif(EXISTS ${PROJECT_DIR}/main/CMakeLists.txt)
