@@ -110,14 +110,14 @@ jobs:
           
           IFS='-' read -r BOARD_NAME BOARD_VARIANT <<< "${{ matrix.board }}"
 
-          IDF_CMD="idf.py  -D MICROPY_DIR="~/micropython/" -D MICROPY_BOARD=$BOARD_NAME -B build-${{ matrix.board }}"
+          IDF_CMD="idf.py  -D MICROPY_DIR="~/micropython" -D MICROPY_BOARD=$BOARD_NAME -B build-${{ matrix.board }}"
           if [ -n "${BOARD_VARIANT}" ]; then
               IDF_CMD="$IDF_CMD -D MICROPY_BOARD_VARIANT=$BOARD_VARIANT"
           fi
           # make BOARD=$BOARD_NAME submodules
           eval "$IDF_CMD build"
 
-          cd ~/micropython/ports/esp32/build-$BOARD_NAME
+          cd build-$BOARD_NAME
           python ../makeimg.py sdkconfig bootloader/bootloader.bin partition_table/partition-table.bin micropython.bin firmware.bin micropython.uf2
           
           mkdir -p ~/artifacts

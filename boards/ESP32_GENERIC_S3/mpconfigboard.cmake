@@ -1,7 +1,5 @@
 set(IDF_TARGET esp32s3)
 
-message(STATUS "MICROPY_PORT_DIR is set to ${MICROPY_PORT_DIR}")
-
 set(SDKCONFIG_DEFAULTS
     ${MICROPY_PORT_DIR}/boards/sdkconfig.base
     ${MICROPY_PORT_DIR}/boards/sdkconfig.usb
