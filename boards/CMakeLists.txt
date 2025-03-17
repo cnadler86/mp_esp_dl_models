@@ -68,12 +68,6 @@ endforeach()
 configure_file(${CMAKE_BINARY_DIR}/sdkconfig.combined.in ${CMAKE_BINARY_DIR}/sdkconfig.combined COPYONLY)
 set(SDKCONFIG_DEFAULTS ${CMAKE_BINARY_DIR}/sdkconfig.combined)
 
-if(EXISTS ${MICROPY_PORT_DIR}/main_${IDF_TARGET}/linker.lf)
-    set(MICROPY_USER_LDFRAGMENTS ${MICROPY_PORT_DIR}/main_${IDF_TARGET}/linker.lf)
-else()
-    set(MICROPY_USER_LDFRAGMENTS ${MICROPY_PORT_DIR}/main/linker.lf)
-endif()
-
 # Include main IDF cmake file.
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 
