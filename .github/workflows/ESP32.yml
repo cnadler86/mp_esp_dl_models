@@ -8,6 +8,7 @@ on:
     paths:
       - 'src/**'
       - '.github/workflows/*.yml'
+      - 'boards/**'
     tags-ignore:
       - 'v*'
   pull_request:
