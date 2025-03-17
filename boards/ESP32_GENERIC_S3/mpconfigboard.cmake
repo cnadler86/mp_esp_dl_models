@@ -1,3 +1,6 @@
+get_filename_component(MICROPY_DIR ${CMAKE_CURRENT_LIST_DIR}/../../.. ABSOLUTE)
+get_filename_component(MICROPY_PORT_DIR ${MICROPY_DIR}/ports/esp32 ABSOLUTE)
+
 set(IDF_TARGET esp32s3)
 
 message(STATUS "MICROPY_PORT_DIR is set to ${MICROPY_PORT_DIR}")
