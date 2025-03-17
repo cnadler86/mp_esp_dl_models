@@ -110,7 +110,7 @@ jobs:
           
           IFS='-' read -r BOARD_NAME BOARD_VARIANT <<< "${{ matrix.board }}"
 
-          IDF_CMD="idf.py -D MICROPY_BOARD=$BOARD_NAME -B build-${{ matrix.board }}"
+          IDF_CMD="idf.py  -D MICROPY_DIR="~/micropython/" -D MICROPY_BOARD=$BOARD_NAME -B build-${{ matrix.board }}"
           if [ -n "${BOARD_VARIANT}" ]; then
               IDF_CMD="$IDF_CMD -D MICROPY_BOARD_VARIANT=$BOARD_VARIANT"
           fi
