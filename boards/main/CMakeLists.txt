@@ -1,5 +1,6 @@
-set(MICROPY_PORT_DIR $ENV{EV_MICROPY_PORT_DIR})
-get_filename_component(MICROPY_DIR MICROPY_PORT_DIR/../.. ABSOLUTE)
+set(MICROPY_DIR $ENV{EV_MICROPY_DIR})
+get_filename_component(MICROPY_PORT_DIR ${MICROPY_DIR}/ports/esp32 ABSOLUTE)
+message(STATUS "MICROPY_DIR: ${MICROPY_DIR}")
 if(EXISTS ${MICROPY_PORT_DIR}/main_esp32s3/CMakeLists.txt)
     include(${MICROPY_PORT_DIR}/main_esp32s3/CMakeLists.txt)
 elseif(EXISTS ${MICROPY_PORT_DIR}/main/CMakeLists.txt)
