@@ -7,5 +7,5 @@ set(SDKCONFIG_DEFAULTS
     ${MICROPY_PORT_DIR}/boards/sdkconfig.usb
     ${MICROPY_PORT_DIR}/boards/sdkconfig.ble
     ${MICROPY_PORT_DIR}/boards/sdkconfig.spiram_sx
-    boards/ESP32_GENERIC_S3/sdkconfig.board
+    ESP32_GENERIC_S3/sdkconfig.board
 )
