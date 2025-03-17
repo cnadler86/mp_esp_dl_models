@@ -18,13 +18,14 @@ set(MICROPY_PORT_DIR ${MICROPY_DIR}/ports/esp32)
 if(NOT MICROPY_BOARD_DIR)
     set(MICROPY_BOARD_DIR ${CMAKE_CURRENT_LIST_DIR}/boards/${MICROPY_BOARD})
 endif()
-if(NOT EXISTS ${MICROPY_BOARD_DIR}/mpconfigboard.cmake)
-    message(FATAL_ERROR "Invalid MICROPY_BOARD specified: ${MICROPY_BOARD}")
-endif()
 
 message(STATUS "MICROPY_DIR is set to ${MICROPY_DIR}")
 message(STATUS "MICROPY_PORT_DIR is set to ${MICROPY_PORT_DIR}")
 message(STATUS "MICROPY_BOARD_DIR is set to ${MICROPY_BOARD_DIR}")
+
+if(NOT EXISTS ${MICROPY_BOARD_DIR}/mpconfigboard.cmake)
+    message(FATAL_ERROR "Invalid MICROPY_BOARD specified: ${MICROPY_BOARD}")
+endif()
 
 # If a board variant is specified, check that it exists.
 if(MICROPY_BOARD_VARIANT)
