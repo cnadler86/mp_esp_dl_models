@@ -1,0 +1,9 @@
+## IDF Component Manager Manifest File
+dependencies:
+  espressif/esp_new_jpeg: "~0.6.0"
+  espressif/human_face_detect:
+    version: "^0.2.0"
+  espressif/imagenet_cls:
+    version: "^0.2.0"
+  idf:
+    version: ">=5.2.0"

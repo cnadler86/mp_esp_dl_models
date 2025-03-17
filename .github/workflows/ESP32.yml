@@ -105,12 +105,12 @@ jobs:
           cd ${{ github.workspace }} && cd ..
           git clone https://github.com/cnadler86/mp_jpeg.git
           cd ~/micropython/ && git pull
-          cd ~/micropython/ports/esp32
+          cd ${{ github.workspace }}/boards/
           source ~/esp-idf/export.sh
           
           IFS='-' read -r BOARD_NAME BOARD_VARIANT <<< "${{ matrix.board }}"
 
-          IDF_CMD="idf.py -D MICROPY_BOARD_DIR=${{ github.workspace }}/boards/ESP32_GENERIC_S3 -D MICROPY_BOARD=$BOARD_NAME -D USER_C_MODULES=${{ github.workspace }}/src/micropython.cmake -B build-${{ matrix.board }}"
+          IDF_CMD="idf.py -D MICROPY_BOARD=$BOARD_NAME -B build-${{ matrix.board }}"
           if [ -n "${BOARD_VARIANT}" ]; then
               IDF_CMD="$IDF_CMD -D MICROPY_BOARD_VARIANT=$BOARD_VARIANT"
           fi
