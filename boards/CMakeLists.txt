@@ -57,7 +57,7 @@ endif()
 if (MICROPY_USER_FROZEN_MANIFEST)
     set(MICROPY_FROZEN_MANIFEST ${MICROPY_USER_FROZEN_MANIFEST})
 elseif (NOT MICROPY_FROZEN_MANIFEST)
-    set(MICROPY_FROZEN_MANIFEST ${MICROPY_DIR}/boards/manifest.py)
+    set(MICROPY_FROZEN_MANIFEST ${MICROPY_PORT_DIR}/boards/manifest.py)
 endif()
 
 # Concatenate all sdkconfig files into a combined one for the IDF to use.
