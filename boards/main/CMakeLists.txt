@@ -2,6 +2,7 @@ set(MICROPY_DIR $ENV{EV_MICROPY_DIR})
 get_filename_component(MICROPY_PORT_DIR ${MICROPY_DIR}/ports/esp32 ABSOLUTE)
 message(STATUS "Got MICROPY_DIR: ${MICROPY_DIR}, MICROPY_PORT_DIR: ${MICROPY_PORT_DIR}")
 
+set(PROJECT_DIR ${MICROPY_DIR}/ports/esp32)
 if(EXISTS ${MICROPY_PORT_DIR}/main_esp32s3/CMakeLists.txt)
     include(${MICROPY_PORT_DIR}/main_esp32s3/CMakeLists.txt)
 elseif(EXISTS ${MICROPY_PORT_DIR}/main/CMakeLists.txt)
