@@ -1,3 +1,5 @@
+include(${MICROPY_DIR}/py/py.cmake)
+
 add_library(usermod_mp_esp_dl INTERFACE)
 
 add_dependencies(usermod_mp_esp_dl human_face_detect)
@@ -29,3 +31,5 @@ else()
 endif()
 
 target_link_libraries(usermod INTERFACE usermod_mp_esp_dl)
+
+micropy_gather_target_properties(usermod_mp_esp_dl)
