@@ -67,7 +67,7 @@ jobs:
           cd ~
           git clone --depth 1 --branch release/v5.4 https://github.com/espressif/esp-idf.git
           git -C esp-idf submodule update --init --recursive --filter=tree:0
-          cd esp-idf && ./install.sh esp32s3
+          cd esp-idf && ./install.sh all
           source ./export.sh
 
   build:
