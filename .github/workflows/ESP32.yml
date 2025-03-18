@@ -107,7 +107,7 @@ jobs:
           cd ${{ github.workspace }} && cd ..
           git clone https://github.com/cnadler86/mp_jpeg.git
           cd ~/micropython/ports/esp32 && make BOARD=$BOARD_NAME submodules
-          cp ~/micropython ${{ github.workspace }}
+          cp -R ~/micropython ${{ github.workspace }}
           cd ${{ github.workspace }}/boards/
           
           IFS='-' read -r BOARD_NAME BOARD_VARIANT <<< "${{ matrix.board }}"
