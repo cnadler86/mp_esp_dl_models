@@ -6,7 +6,7 @@ add_dependencies(usermod_mp_esp_dl human_face_detect)
 
 target_sources(usermod_mp_esp_dl INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/esp_face_detector.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/esp_image_net.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/esp_imagenet_cls.cpp
     ${CMAKE_CURRENT_LIST_DIR}/esp_mp_dl_module.c
 )
 

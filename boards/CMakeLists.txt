@@ -6,7 +6,7 @@
 cmake_minimum_required(VERSION 3.12)
 
 # Set the location of MicroPython, the esp32 port, and the board directory.
-get_filename_component(PROJECT_DIR ".." ABSOLUTE)
+get_filename_component(PROJECT_DIR "../.." ABSOLUTE)
 if(NOT MICROPY_BOARD)
     set(MICROPY_BOARD ESP32_GENERIC_S3)
 endif()

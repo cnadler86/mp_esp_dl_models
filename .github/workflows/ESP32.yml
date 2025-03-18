@@ -107,11 +107,12 @@ jobs:
           cd ${{ github.workspace }} && cd ..
           git clone https://github.com/cnadler86/mp_jpeg.git
           cd ~/micropython/ports/esp32 && make BOARD=$BOARD_NAME submodules
+          cp ~/micropython ${{ github.workspace }}
           cd ${{ github.workspace }}/boards/
           
           IFS='-' read -r BOARD_NAME BOARD_VARIANT <<< "${{ matrix.board }}"
 
-          IDF_CMD="idf.py  -D MICROPY_DIR="~/micropython" -D MICROPY_BOARD=$BOARD_NAME -B build-${{ matrix.board }}"
+          IDF_CMD="idf.py -D MICROPY_DIR="${{ github.workspace }}/micropython" -D MICROPY_BOARD=$BOARD_NAME -B build-${{ matrix.board }}"
           if [ -n "${BOARD_VARIANT}" ]; then
               IDF_CMD="$IDF_CMD -D MICROPY_BOARD_VARIANT=$BOARD_VARIANT"
           fi
