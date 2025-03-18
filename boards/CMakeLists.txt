@@ -39,9 +39,6 @@ endif()
 # Define the output sdkconfig so it goes in the build directory.
 set(SDKCONFIG ${CMAKE_BINARY_DIR}/sdkconfig)
 
-# Save the manifest file set from the cmake command line.
-set(MICROPY_USER_FROZEN_MANIFEST ${MICROPY_FROZEN_MANIFEST})
-
 # Include board config; this is expected to set (among other options):
 # - SDKCONFIG_DEFAULTS
 # - IDF_TARGET
@@ -52,13 +49,7 @@ else()
     include(${MICROPY_BOARD_DIR}/mpconfigvariant_${MICROPY_BOARD_VARIANT}.cmake)
 endif()
 
-# Set the frozen manifest file. Note if MICROPY_FROZEN_MANIFEST is set from the cmake
-# command line, then it will override the default and any manifest set by the board.
-if (MICROPY_USER_FROZEN_MANIFEST)
-    set(MICROPY_FROZEN_MANIFEST ${MICROPY_USER_FROZEN_MANIFEST})
-elseif (NOT MICROPY_FROZEN_MANIFEST)
-    set(MICROPY_FROZEN_MANIFEST ${MICROPY_PORT_DIR}/boards/manifest.py)
-endif()
+set(MICROPY_FROZEN_MANIFEST ${MICROPY_PORT_DIR}/boards/manifest.py)
 
 # Concatenate all sdkconfig files into a combined one for the IDF to use.
 file(WRITE ${CMAKE_BINARY_DIR}/sdkconfig.combined.in "")

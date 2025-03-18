@@ -115,7 +115,7 @@ jobs:
           if [ -n "${BOARD_VARIANT}" ]; then
               IDF_CMD="$IDF_CMD -D MICROPY_BOARD_VARIANT=$BOARD_VARIANT"
           fi
-          # make BOARD=$BOARD_NAME submodules
+          make BOARD=$BOARD_NAME submodules
           eval "$IDF_CMD build"
 
           cd build-$BOARD_NAME
