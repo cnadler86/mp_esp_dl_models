@@ -1,9 +1,11 @@
 ## IDF Component Manager Manifest File
 dependencies:
+  espressif/mdns: "~1.1.0"
+  espressif/esp_tinyusb: "~1.0.0"
   espressif/esp_new_jpeg: "~0.6.0"
   espressif/human_face_detect:
     version: "^0.2.0"
   espressif/imagenet_cls:
     version: "^0.2.0"
   idf:
-    version: ">=5.2.0"
+    version: ">=5.3.0"
