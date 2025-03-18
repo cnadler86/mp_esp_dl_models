@@ -103,11 +103,11 @@ jobs:
 
       - name: Build MicroPython
         run: |
+          source ~/esp-idf/export.sh
           cd ${{ github.workspace }} && cd ..
           git clone https://github.com/cnadler86/mp_jpeg.git
           cd ~/micropython/ports/esp32 && make BOARD=$BOARD_NAME submodules
           cd ${{ github.workspace }}/boards/
-          source ~/esp-idf/export.sh
           
           IFS='-' read -r BOARD_NAME BOARD_VARIANT <<< "${{ matrix.board }}"
 
