@@ -57,7 +57,7 @@ endif()
 if (MICROPY_USER_FROZEN_MANIFEST)
     set(MICROPY_FROZEN_MANIFEST ${MICROPY_USER_FROZEN_MANIFEST})
 elseif (NOT MICROPY_FROZEN_MANIFEST)
-    set(MICROPY_FROZEN_MANIFEST ${CMAKE_CURRENT_LIST_DIR}/boards/manifest.py)
+    set(MICROPY_FROZEN_MANIFEST ${MICROPY_DIR}/boards/manifest.py)
 endif()
 
 # Concatenate all sdkconfig files into a combined one for the IDF to use.
@@ -73,6 +73,4 @@ set(SDKCONFIG_DEFAULTS ${CMAKE_BINARY_DIR}/sdkconfig.combined)
 
 # Include main IDF cmake file.
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
-
-# Define the project.
 project(micropython)
