@@ -105,7 +105,7 @@ jobs:
         run: |
           cd ${{ github.workspace }} && cd ..
           git clone https://github.com/cnadler86/mp_jpeg.git
-          # cd ~/micropython/ && git pull
+          cd ~/micropython/ && make BOARD=$BOARD_NAME submodules
           cd ${{ github.workspace }}/boards/
           source ~/esp-idf/export.sh
           
@@ -115,7 +115,7 @@ jobs:
           if [ -n "${BOARD_VARIANT}" ]; then
               IDF_CMD="$IDF_CMD -D MICROPY_BOARD_VARIANT=$BOARD_VARIANT"
           fi
-          make BOARD=$BOARD_NAME submodules
+          
           eval "$IDF_CMD build"
 
           cd build-$BOARD_NAME
