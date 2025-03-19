@@ -68,7 +68,7 @@ jobs:
           cd ~
           git clone --depth 1 --branch release/v5.4 https://github.com/espressif/esp-idf.git
           git -C esp-idf submodule update --init --recursive --filter=tree:0
-          cd esp-idf && ./install.sh all
+          cd esp-idf && ./install.sh esp32s3
           source ./export.sh
 
   build:
@@ -107,7 +107,7 @@ jobs:
           source ~/esp-idf/export.sh
           cd ${{ github.workspace }} && cd ..
           git clone https://github.com/cnadler86/mp_jpeg.git
-          cd ~/micropython/ports/esp32 && make BOARD=$BOARD_NAME submodules
+          # cd ~/micropython/ports/esp32 && make BOARD=$BOARD_NAME submodules
           cp -R ~/micropython ${{ github.workspace }}
           cd ${{ github.workspace }}/boards/
           
