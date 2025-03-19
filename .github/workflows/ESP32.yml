@@ -120,7 +120,7 @@ jobs:
           eval "$IDF_CMD build"
 
           cd build-${{ matrix.board }}
-          python ../makeimg.py sdkconfig bootloader/bootloader.bin partition_table/partition-table.bin micropython.bin firmware.bin micropython.uf2
+          python ~/micropython/ports/esp32/makeimg.py sdkconfig bootloader/bootloader.bin partition_table/partition-table.bin micropython.bin firmware.bin micropython.uf2
           
           mkdir -p ~/artifacts
           mv firmware.bin ~/artifacts/firmware-${BOARD_NAME}.bin
