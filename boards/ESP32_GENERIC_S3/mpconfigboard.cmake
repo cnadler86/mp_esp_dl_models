@@ -11,7 +11,3 @@ set(SDKCONFIG_DEFAULTS
 include($ENV{IDF_PATH}/tools/cmake/version.cmake)
 set(IDF_VERSION "${IDF_VERSION_MAJOR}.${IDF_VERSION_MINOR}.${IDF_VERSION_PATCH}")
 message(STATUS "IDF version: ${IDF_VERSION}")
-if (IDF_VERSION VERSION_GREATER_EQUAL "5.2.0")
-    # list(APPEND SDKCONFIG_DEFAULTS ${MICROPY_PORT_DIR}/boards/sdkconfig.idf52)
-    # message(STATUS "Adding the SDK config, final list is: ${SDKCONFIG_DEFAULTS}")
-endif()

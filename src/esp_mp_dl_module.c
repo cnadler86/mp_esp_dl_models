@@ -1,5 +1,5 @@
 #include "py/runtime.h"
-#include "esp_face_detector.h"
+#include "esp_mp_dl.h"
 
 static const mp_rom_map_elem_t module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_mp_dl) },
