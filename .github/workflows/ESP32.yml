@@ -119,7 +119,7 @@ jobs:
           
           eval "$IDF_CMD build"
 
-          cd build-$BOARD_NAME
+          cd build-${{ matrix.board }}
           python ../makeimg.py sdkconfig bootloader/bootloader.bin partition_table/partition-table.bin micropython.bin firmware.bin micropython.uf2
           
           mkdir -p ~/artifacts
