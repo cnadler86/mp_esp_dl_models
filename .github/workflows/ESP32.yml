@@ -138,5 +138,5 @@ jobs:
         with:
           name: build-logs-${{ matrix.board }}
           path: |
-            ~/micropython/ports/esp32/build-${{ matrix.board }}/log/
+            ${{ github.workspace }}/boards/build-${{ matrix.board }}/log/
           retention-days: 5
