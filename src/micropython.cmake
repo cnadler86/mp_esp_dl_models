@@ -46,6 +46,10 @@ else()
     message(WARNING "MP_CAMERA_SRC not found or not defined!")
 endif()
 
+if (MP_DL_IMAGENET_CLS_ENABLED)
+    target_compile_definitions(usermod_mp_esp_dl INTERFACE MP_DL_IMAGENET_CLS_ENABLED=1)
+endif()
+
 target_link_libraries(usermod INTERFACE usermod_mp_esp_dl)
 
 micropy_gather_target_properties(usermod_mp_esp_dl)
