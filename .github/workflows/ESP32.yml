@@ -22,6 +22,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  MICROPYTHON_DIR: ~/micropython
+  ESP_IDF_DIR: ~/esp-idf
+  ARTIFACTS_DIR: ~/artifacts
+
 jobs:
   setup-environment:
     runs-on: ubuntu-24.04
@@ -37,10 +42,10 @@ jobs:
         with:
           lookup-only: true
           path: |
-            ~/esp-idf/
+            ${{ env.ESP_IDF_DIR }}
             ~/.espressif/
             ~/.cache/pip/
-            ~/micropython/
+            ${{ env.MICROPYTHON_DIR }}
           key: mpy-${{ env.MPY_RELEASE }}
           restore-keys: mpy-
 
@@ -54,21 +59,18 @@ jobs:
         if: steps.cache_esp_idf.outputs.cache-hit != 'true'
         run: |
           cd ~
-          # git clone https://github.com/micropython/micropython.git
-          # git clone --depth 1 --branch ${{ env.MPY_RELEASE }} https://github.com/micropython/micropython.git
-          git clone --depth 1 --branch mp-dl https://github.com/cnadler86/micropython.git
-          cd micropython
+          git clone --depth 1 --branch mp-dl https://github.com/cnadler86/micropython.git ${{ env.MICROPYTHON_DIR }}
+          cd ${{ env.MICROPYTHON_DIR }}
           git submodule update --init --depth 1
           cd mpy-cross && make
-          # cd ~/micropython/ports/esp32 && make submodules
 
       - name: Set up ESP-IDF
         if: steps.cache_esp_idf.outputs.cache-hit != 'true'
         run: |
           cd ~
-          git clone --depth 1 --branch release/v5.4 https://github.com/espressif/esp-idf.git
-          git -C esp-idf submodule update --init --recursive --filter=tree:0
-          cd esp-idf && ./install.sh esp32s3
+          git clone --depth 1 --branch release/v5.4 https://github.com/espressif/esp-idf.git ${{ env.ESP_IDF_DIR }}
+          git -C ${{ env.ESP_IDF_DIR }} submodule update --init --recursive --filter=tree:0
+          cd ${{ env.ESP_IDF_DIR }} && ./install.sh esp32s3
           source ./export.sh
 
   build:
@@ -92,10 +94,10 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            ~/esp-idf/
+            ${{ env.ESP_IDF_DIR }}
             ~/.espressif/
             ~/.cache/pip/
-            ~/micropython/
+            ${{ env.MICROPYTHON_DIR }}
           key: mpy-${{ env.MPY_RELEASE }}
           restore-keys: mpy-
 
@@ -104,17 +106,16 @@ jobs:
 
       - name: Build MicroPython
         run: |
-          source ~/esp-idf/export.sh
+          source ${{ env.ESP_IDF_DIR }}/export.sh
           cd ${{ github.workspace }} && cd ..
           git clone https://github.com/cnadler86/mp_jpeg.git
           git clone https://github.com/cnadler86/micropython-camera-API.git
           
-          # cd ~/micropython/ports/esp32 && make BOARD=$BOARD_NAME submodules
           cd ${{ github.workspace }}/boards/
           
           IFS='-' read -r BOARD_NAME BOARD_VARIANT <<< "${{ matrix.board }}"
 
-          IDF_CMD="idf.py -D MICROPY_DIR="~/micropython" -D MICROPY_BOARD=$BOARD_NAME -B build-${{ matrix.board }}"
+          IDF_CMD="idf.py -D MICROPY_DIR=${{ env.MICROPYTHON_DIR }} -D MICROPY_BOARD=$BOARD_NAME -B build-${{ matrix.board }}"
           if [ -n "${BOARD_VARIANT}" ]; then
               IDF_CMD="$IDF_CMD -D MICROPY_BOARD_VARIANT=$BOARD_VARIANT"
           fi
@@ -122,20 +123,20 @@ jobs:
           eval "$IDF_CMD build"
 
           cd build-${{ matrix.board }}
-          python ~/micropython/ports/esp32/makeimg.py sdkconfig bootloader/bootloader.bin partition_table/partition-table.bin micropython.bin firmware.bin micropython.uf2
+          python ${{ env.MICROPYTHON_DIR }}/ports/esp32/makeimg.py sdkconfig bootloader/bootloader.bin partition_table/partition-table.bin micropython.bin firmware.bin micropython.uf2
           
-          mkdir -p ~/artifacts
-          mv firmware.bin ~/artifacts/firmware-${BOARD_NAME}.bin
+          mkdir -p ${{ env.ARTIFACTS_DIR }}
+          mv firmware.bin ${{ env.ARTIFACTS_DIR }}/firmware-${BOARD_NAME}.bin
 
       - name: Upload firmware artifact
         uses: actions/upload-artifact@v4
         with:
           name: firmware-${{ matrix.board }}
-          path: ~/artifacts/**
+          path: ${{ env.ARTIFACTS_DIR }}/**
           retention-days: 5
 
       - name: Upload build logs on failure
-        if: failure()  # Dieser Schritt wird nur bei einem Fehlschlag ausgeführt
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: build-logs-${{ matrix.board }}

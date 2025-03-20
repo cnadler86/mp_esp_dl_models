@@ -10,4 +10,3 @@ set(SDKCONFIG_DEFAULTS
 
 include($ENV{IDF_PATH}/tools/cmake/version.cmake)
 set(IDF_VERSION "${IDF_VERSION_MAJOR}.${IDF_VERSION_MINOR}.${IDF_VERSION_PATCH}")
-message(STATUS "IDF version: ${IDF_VERSION}")

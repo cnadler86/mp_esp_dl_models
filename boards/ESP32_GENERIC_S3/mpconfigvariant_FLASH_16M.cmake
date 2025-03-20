@@ -8,3 +8,5 @@ set(SDKCONFIG_DEFAULTS
 list(APPEND MICROPY_DEF_BOARD
     MICROPY_HW_BOARD_NAME="Generic ESP32S3 module 16MB flash with Octal-SPIRAM"
 )
+
+add_compile_definitions(MP_DL_IMAGENET_CLS_ENABLED=1)

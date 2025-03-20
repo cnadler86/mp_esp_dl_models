@@ -3,6 +3,8 @@
 #include "imagenet_cls.hpp"
 #include <memory>
 
+#if MP_DL_IMAGENET_CLS_ENABLED
+
 namespace mp_dl::imagenet {
 
 // Object
@@ -98,3 +100,5 @@ MP_DEFINE_CONST_OBJ_TYPE(
     print, (const void *)mp_dl::imagenet::print,
     locals_dict, &mp_dl::imagenet::image_net_locals_dict
 );
+
+#endif // MP_DL_IMAGENET_CLS_ENABLED
