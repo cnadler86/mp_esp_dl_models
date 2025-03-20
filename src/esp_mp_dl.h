@@ -7,6 +7,8 @@ extern "C" {
 #include "py/obj.h"
 #include "py/runtime.h"
 
+#include "dl_image.hpp"
+
 extern const mp_obj_type_t mp_face_detector_type;
 extern const mp_obj_type_t mp_image_net_type;
 
@@ -25,3 +27,21 @@ extern const mp_obj_type_t mp_image_net_type;
 #ifdef __cplusplus
 }
 #endif
+
+void initialize_img(dl::image::img_t &img, int width, int height) {
+    img.width = width;
+    img.height = height;
+    img.pix_type = dl::image::DL_IMAGE_PIX_TYPE_RGB888;
+    img.data = nullptr;
+}
+
+mp_buffer_info_t get_and_validate_framebuffer(mp_obj_t framebuffer_obj, const dl::image::img_t &img) {
+    mp_buffer_info_t bufinfo;
+    mp_get_buffer_raise(framebuffer_obj, &bufinfo, MP_BUFFER_READ);
+
+    if (bufinfo.len != img.width * img.height * 3) {
+        mp_raise_ValueError("Frame buffer size does not match the image size");
+    }
+
+    return bufinfo;
+}
