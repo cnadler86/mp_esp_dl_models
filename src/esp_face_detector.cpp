@@ -1,7 +1,6 @@
 #include "esp_mp_dl.h"
 #include "freertos/idf_additions.h"
 #include "human_face_detect.hpp"
-#include <memory>
 
 namespace mp_dl::detector {
 

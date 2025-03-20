@@ -1,7 +1,6 @@
 #include "esp_mp_dl.h"
 #include "freertos/idf_additions.h"
 #include "imagenet_cls.hpp"
-#include <memory>
 
 #if MP_DL_IMAGENET_CLS_ENABLED
 
