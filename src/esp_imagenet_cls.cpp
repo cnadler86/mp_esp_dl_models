@@ -1,6 +1,7 @@
 #include "esp_mp_dl.h"
 #include "freertos/idf_additions.h"
 #include "imagenet_cls.hpp"
+#include <memory>
 
 #if MP_DL_IMAGENET_CLS_ENABLED
 
@@ -31,7 +32,10 @@ static mp_obj_t image_net_make_new(const mp_obj_type_t *type, size_t n_args, siz
         mp_raise_msg(&mp_type_RuntimeError, "Failed to create model instance");
     }
 
-    initialize_img(self->img, parsed_args[ARG_img_width].u_int, parsed_args[ARG_img_height].u_int);
+    self->img.width = parsed_args[ARG_img_width].u_int;
+    self->img.height = parsed_args[ARG_img_height].u_int;
+    self->img.pix_type = dl::image::DL_IMAGE_PIX_TYPE_RGB888;
+    self->img.data = nullptr;
 
     return MP_OBJ_FROM_PTR(self);
 }

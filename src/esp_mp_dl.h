@@ -7,8 +7,16 @@ extern "C" {
 #include "py/obj.h"
 #include "py/runtime.h"
 
+#ifdef __cplusplus
+}
+#endif
+
 #include "dl_image_define.hpp"
 #include <memory>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 extern const mp_obj_type_t mp_face_detector_type;
 extern const mp_obj_type_t mp_image_net_type;
