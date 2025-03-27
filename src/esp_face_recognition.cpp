@@ -84,7 +84,7 @@ static mp_obj_t face_detector_enroll(mp_obj_t self_in, mp_obj_t framebuffer_obj)
         mp_raise_ValueError("Only one face can be enrolled at a time");
     }
 
-    auto &recon_results = self->FaceRecognizer->recognize(self->img, detect_results);
+    auto recon_results = self->FaceRecognizer->recognize(self->img, detect_results);
     if (recon_results.size() > 0) {
         mp_raise_ValueError("Face already enrolled");
     }
@@ -104,7 +104,7 @@ static mp_obj_t face_detector_detect(mp_obj_t self_in, mp_obj_t framebuffer_obj)
         return mp_const_none;
     }
 
-    auto &recon_results = self->FaceRecognizer->recognize(self->img, detect_results);
+    auto recon_results = self->FaceRecognizer->recognize(self->img, detect_results);
 
     mp_obj_t list = mp_obj_new_list(0, NULL);
     for (const auto &res : detect_results) {
