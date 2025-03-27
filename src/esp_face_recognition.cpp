@@ -41,7 +41,7 @@ static mp_obj_t face_detector_make_new(const mp_obj_type_t *type, size_t n_args,
 
     self->FaceDetector = std::make_shared<HumanFaceDetect>();
     self->FaceFeat = std::make_shared<HumanFaceFeat>();
-    self->FaceRecognizer = std::make_shared<HumanFaceRecognizer>(self->FaceFeat, self->db_path);
+    self->FaceRecognizer = std::make_shared<HumanFaceRecognizer>(self->FaceFeat.get(), self->db_path);
 
     if ((!self->FaceDetector) || (!self->FaceFeat) || (!self->FaceRecognizer)) {
         mp_raise_msg(&mp_type_RuntimeError, "Failed to create model instances");
