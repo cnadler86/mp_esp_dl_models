@@ -34,12 +34,7 @@ static mp_obj_t face_detector_make_new(const mp_obj_type_t *type, size_t n_args,
     MP_FaceRecognizer *self = mp_obj_malloc_with_finaliser(MP_FaceRecognizer, &mp_face_recognizer_type);
 
     if (parsed_args[ARG_db_path].u_obj != mp_const_none) {
-        const char *db_path = mp_obj_str_get_str(parsed_args[ARG_db_path].u_obj);
-        mp_obj_t file = mp_vfs_open(MP_OBJ_NEW_QSTR(qstr_from_str(db_path)), MP_OBJ_NEW_QSTR(qstr_from_str("r")), MP_OBJ_NULL);
-        if (file == MP_OBJ_NULL) {
-            mp_raise_ValueError("Database file does not exist");
-        }
-        snprintf(self->db_path, sizeof(self->db_path), "/%s", db_path);
+        snprintf(self->db_path, sizeof(self->db_path), "/%s", mp_obj_str_get_str(parsed_args[ARG_db_path].u_obj));
     } else {
         snprintf(self->db_path, sizeof(self->db_path), "/faces.db");
     }
