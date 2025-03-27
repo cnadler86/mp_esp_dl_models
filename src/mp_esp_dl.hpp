@@ -8,8 +8,6 @@ extern "C" {
 
 #include "py/obj.h"
 #include "py/runtime.h"
-#include "extmod/vfs.h"
-#include "extmod/vfs_fat.h"
 
 extern const mp_obj_type_t mp_face_detector_type;
 extern const mp_obj_type_t mp_image_net_type;
