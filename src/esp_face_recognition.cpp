@@ -2,7 +2,6 @@
 #include "freertos/idf_additions.h"
 #include "human_face_detect.hpp"
 #include "human_face_recognition.hpp"
-#include "dl_recognition_database.hpp"
 
 #if MP_DL_FACE_RECOGNITION_ENABLED
 
