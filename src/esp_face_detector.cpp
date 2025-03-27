@@ -32,10 +32,6 @@ static mp_obj_t face_detector_make_new(const mp_obj_type_t *type, size_t n_args,
     }
 
     mp_esp_dl::initialize_img(self->img, parsed_args[ARG_img_width].u_int, parsed_args[ARG_img_height].u_int);
-    // self->img.width = parsed_args[ARG_img_width].u_int;
-    // self->img.height = parsed_args[ARG_img_height].u_int;
-    // self->img.pix_type = dl::image::DL_IMAGE_PIX_TYPE_RGB888;
-    // self->img.data = nullptr;
 
     self->return_features = parsed_args[ARG_return_features].u_bool;
 
@@ -59,16 +55,6 @@ static MP_DEFINE_CONST_FUN_OBJ_3_CXX(face_detector_set_pixelformat_obj, face_det
 
 // Detect method
 static mp_obj_t face_detector_detect(mp_obj_t self_in, mp_obj_t framebuffer_obj) {
-    // MP_FaceDetector *self = static_cast<MP_FaceDetector *>(MP_OBJ_TO_PTR(self_in));
-
-    // mp_buffer_info_t bufinfo;
-    // mp_get_buffer_raise(framebuffer_obj, &bufinfo, MP_BUFFER_READ);
-
-    // if (bufinfo.len != self->img.width * self->img.height * 3) {
-    //     mp_raise_ValueError("Frame buffer size does not match the image size");
-    // } else {
-    //     self->img.data = (uint8_t *)bufinfo.buf;
-    // }
     MP_FaceDetector *self = mp_esp_dl::get_and_validate_framebuffer<MP_FaceDetector>(self_in, framebuffer_obj);
 
     auto &detect_results = self->model->run(self->img);
