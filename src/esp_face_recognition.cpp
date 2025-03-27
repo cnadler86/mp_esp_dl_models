@@ -3,6 +3,8 @@
 #include "human_face_detect.hpp"
 #include "human_face_recognition.hpp"
 
+#if MP_DL_FACE_RECOGNITION_ENABLED
+
 namespace mp_esp_dl::FaceRecognizer {
 
 // Object
@@ -163,3 +165,5 @@ MP_DEFINE_CONST_OBJ_TYPE(
     print, (const void *)mp_esp_dl::FaceRecognizer::print,
     locals_dict, &mp_esp_dl::FaceRecognizer::face_detector_locals_dict
 );
+
+#endif // MP_DL_FACE_RECOGNITION_ENABLED
