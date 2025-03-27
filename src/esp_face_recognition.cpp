@@ -2,6 +2,7 @@
 #include "freertos/idf_additions.h"
 #include "human_face_detect.hpp"
 #include "human_face_recognition.hpp"
+#include "dl_recognition_database.hpp"
 
 #if MP_DL_FACE_RECOGNITION_ENABLED
 
@@ -38,7 +39,7 @@ static mp_obj_t face_detector_make_new(const mp_obj_type_t *type, size_t n_args,
     } else {
         snprintf(self->db_path, sizeof(self->db_path), "/faces.db");
     }
-
+    
     self->FaceDetector = std::make_shared<HumanFaceDetect>();
     self->FaceFeat = std::make_shared<HumanFaceFeat>();
     self->FaceRecognizer = std::make_shared<HumanFaceRecognizer>(self->FaceFeat.get(), self->db_path);
