@@ -64,6 +64,8 @@ else()
     endif()
 endif()
 
+target_compile_options(usermod INTERFACE -frtti)
+
 target_link_libraries(usermod INTERFACE usermod_mp_esp_dl)
 
 micropy_gather_target_properties(usermod_mp_esp_dl)
