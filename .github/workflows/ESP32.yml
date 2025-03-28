@@ -120,7 +120,7 @@ jobs:
               IDF_CMD="$IDF_CMD -D MICROPY_BOARD_VARIANT=$BOARD_VARIANT"
           fi
           
-          eval "$IDF_CMD build"
+          eval "$IDF_CMD --verbose build"
 
           cd build-${{ matrix.board }}
           python ${{ env.MICROPYTHON_DIR }}/ports/esp32/makeimg.py sdkconfig bootloader/bootloader.bin partition_table/partition-table.bin micropython.bin firmware.bin micropython.uf2
