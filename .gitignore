@@ -1,3 +1,5 @@
 .vscode
 build/
 build-*/
+managed_components/
+dependencies.lock
