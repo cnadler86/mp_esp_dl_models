@@ -59,7 +59,8 @@ jobs:
         if: steps.cache_esp_idf.outputs.cache-hit != 'true'
         run: |
           cd ~
-          git clone --depth 1 --branch mp-dl https://github.com/cnadler86/micropython.git ${{ env.MICROPYTHON_DIR }}
+          # git clone --depth 1 --branch mp-dl https://github.com/cnadler86/micropython.git ${{ env.MICROPYTHON_DIR }}
+          git clone https://github.com/micropython/micropython.git ${{ env.MICROPYTHON_DIR }}
           cd ${{ env.MICROPYTHON_DIR }}
           git submodule update --init --depth 1
           cd mpy-cross && make
