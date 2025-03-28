@@ -16,6 +16,7 @@ endif()
 
 if (MP_DL_FACE_RECOGNITION_ENABLED)
     target_compile_definitions(usermod_mp_esp_dl INTERFACE MP_DL_FACE_RECOGNITION_ENABLED=1)
+    add_dependencies(usermod_mp_esp_dl esp-dl)
     add_dependencies(usermod_mp_esp_dl human_face_recognition)
 endif()
 
