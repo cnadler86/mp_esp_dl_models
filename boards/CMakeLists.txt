@@ -21,6 +21,9 @@ if(NOT MICROPY_BOARD_DIR)
     set(MICROPY_BOARD_DIR ${CMAKE_CURRENT_LIST_DIR}/${MICROPY_BOARD})
 endif()
 
+# Set compile options for C++ files only
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frtti")
+
 message(STATUS "MICROPY_DIR is set to ${MICROPY_DIR}")
 message(STATUS "MICROPY_PORT_DIR is set to ${MICROPY_PORT_DIR}")
 message(STATUS "MICROPY_BOARD_DIR is set to ${MICROPY_BOARD_DIR}")
