@@ -1,3 +1,20 @@
+function(add_esp_component_includes)
+
+    cmake_parse_arguments(COMPONENT_INCL "" "TARGET" "COMPONENTS" ${ARGV})
+
+    foreach(_this_component ${COMPONENT_INCL_COMPONENTS})
+
+        idf_component_get_property(_this_include ${_this_component} INCLUDE_DIRS)
+
+        if (_this_include)
+            idf_component_get_property(_this_dir ${_this_component} COMPONENT_DIR)
+            list(TRANSFORM _this_include PREPEND ${_this_dir}/)
+            target_include_directories(${COMPONENT_INCL_TARGET} INTERFACE ${_this_include})
+        endif()
+
+    endforeach()
+endfunction()
+
 include(${MICROPY_DIR}/py/py.cmake)
 
 add_library(usermod_mp_esp_dl INTERFACE)
@@ -16,8 +33,12 @@ endif()
 
 if (MP_DL_FACE_RECOGNITION_ENABLED)
     target_compile_definitions(usermod_mp_esp_dl INTERFACE MP_DL_FACE_RECOGNITION_ENABLED=1)
-    add_dependencies(usermod_mp_esp_dl esp-dl)
     add_dependencies(usermod_mp_esp_dl human_face_recognition)
+    target_compile_options(usermod INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-frtti>)
+    target_sources(usermod_mp_esp_dl INTERFACE 
+        ${CMAKE_CURRENT_LIST_DIR}/lib/mp_esp_dl_recognition_database.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/lib/mp_esp_dl_human_face_recognition.cpp
+    )
 endif()
 
 target_sources(usermod_mp_esp_dl INTERFACE
@@ -63,8 +84,6 @@ else()
         message(WARNING "MP_JPEG_SRC not found or not defined!")
     endif()
 endif()
-
-target_compile_options(usermod INTERFACE -frtti)
 
 target_link_libraries(usermod INTERFACE usermod_mp_esp_dl)
 
