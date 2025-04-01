@@ -1,12 +1,9 @@
 #include "mp_esp_dl.hpp"
 #include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/queue.h"
-#include "freertos/event_groups.h"
 #include "freertos/idf_additions.h"
 #include "human_face_detect.hpp"
+// #include "human_face_recognition.hpp"
 #include "lib/mp_esp_dl_human_face_recognition.hpp"
-
 #if MP_DL_FACE_RECOGNITION_ENABLED
 
 namespace mp_esp_dl::recognition {
@@ -88,11 +85,6 @@ static mp_obj_t face_recognizer_enroll(mp_obj_t self_in, mp_obj_t framebuffer_ob
     }
     if (detect_results.size() > 1) {
         mp_raise_ValueError("Only one face can be enrolled at a time");
-    }
-
-    auto recon_results = self->FaceRecognizer->recognize(self->img, detect_results);
-    if (recon_results.size() > 0) {
-        mp_raise_ValueError("Face already enrolled");
     }
 
     self->FaceRecognizer->enroll(self->img, detect_results);

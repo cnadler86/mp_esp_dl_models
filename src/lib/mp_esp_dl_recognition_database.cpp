@@ -2,22 +2,10 @@
 #include <unistd.h>
 
 extern "C" {
-#include "extmod/vfs.h" // Include MicroPython VFS header
+    #include "py/runtime.h" // Für mp_load_method und mp_call_method_n_kw
+    #include "py/obj.h" // Für mp_printf
+    #include "mpfile.h"
 }
-
-// Define macros to replace standard file operations with VFS equivalents
-// #define fwrite(ptr, size, count, stream) mp_vfs_blockdev_write(stream, 0, (size) * (count), (const uint8_t *)(ptr))
-// #define fread(ptr, size, count, stream) mp_vfs_blockdev_read(stream, 0, (size) * (count), (uint8_t *)(ptr))
-// #define fseek(stream, offset, whence) mp_vfs_blockdev_read_ext(stream, offset, 0, 0, NULL)
-// #define fclose(stream) mp_vfs_close(stream)
-// #define remove(path) mp_vfs_remove(mp_obj_new_str(path, strlen(path)))
-
-// mp_obj_t mp_fopen(path, mode) {
-//     FILE filename_obj = mp_obj_new_str(path, strlen(path));
-//     FILE mode_obj = mp_obj_new_str(mode, strlen(mode));
-//     FILE args[2] = { filename_obj, mode_obj };
-//     mp_file_from_file_obj(mp_vfs_open(2, args, (mp_map_t *)&mp_const_empty_map));
-// }
 
 static const char *TAG = "mp_esp_dl::recognition::DataBase";
 
@@ -29,7 +17,7 @@ DataBase::DataBase(const char *db_path, int feat_len)
     int length = strlen(db_path) + 1;
     m_db_path = (char *)malloc(sizeof(char) * length);
     memcpy(m_db_path, db_path, length);
-    if (access(db_path, F_OK) == 0) {
+    if (mp_isfile(db_path)) {
         load_database_from_storage(feat_len);
     } else {
         create_empty_database_in_storage(feat_len);
@@ -44,9 +32,8 @@ DataBase::~DataBase()
 
 esp_err_t DataBase::create_empty_database_in_storage(int feat_len)
 {   
-    ESP_LOGI(TAG, "Creating empty database in storage at location %s.", m_db_path);
-    FILE *f = fopen(m_db_path, "wb");
-    size_t size = 0;
+    ESP_LOGI(TAG, "Creating empty database in storage at location %s with feture len %d.", m_db_path, feat_len);
+    mp_file_t *f = mp_open(m_db_path, "wb");
     if (!f) {
         ESP_LOGE(TAG, "Failed to open db.");
         return ESP_FAIL;
@@ -54,25 +41,13 @@ esp_err_t DataBase::create_empty_database_in_storage(int feat_len)
     m_meta.num_feats_total = 0;
     m_meta.num_feats_valid = 0;
     m_meta.feat_len = feat_len;
-    size = fwrite(&m_meta, sizeof(mp_esp_dl::recognition::database_meta), 1, f);
-    if (size != 1) {
-        ESP_LOGE(TAG, "Failed to write db meta data.");
-        fclose(f);
+    mp_int_t nbytes = mp_write(f, &m_meta, sizeof(mp_esp_dl::recognition::database_meta));
+    if (nbytes != sizeof(mp_esp_dl::recognition::database_meta)) {
+        ESP_LOGE(TAG, "Failed to write database meta.");
+        mp_close(f);
         return ESP_FAIL;
     }
-    fclose(f);
-    return ESP_OK;
-}
-
-esp_err_t DataBase::clear_all_feats()
-{
-    if (remove(m_db_path) == -1) {
-        ESP_LOGE(TAG, "Failed to remove db.");
-        return ESP_FAIL;
-    }
-    ESP_RETURN_ON_ERROR(
-        create_empty_database_in_storage(m_meta.feat_len), TAG, "Failed to create empty db in storage.");
-    clear_all_feats_in_memory();
+    mp_close(f);
     return ESP_OK;
 }
 
@@ -90,54 +65,72 @@ esp_err_t DataBase::load_database_from_storage(int feat_len)
 {
     ESP_LOGI(TAG, "Loading database from storage.");
     clear_all_feats_in_memory();
-    FILE *f = fopen(m_db_path, "rb");
-    size_t size = 0;
+
+    // Öffne die Datei mit `mp_open`
+    mp_file_t *f = mp_open(m_db_path, "rb");
     if (!f) {
         ESP_LOGE(TAG, "Failed to open db.");
         return ESP_FAIL;
     }
-    size = fread(&m_meta, sizeof(mp_esp_dl::recognition::database_meta), 1, f);
-    if (size != 1) {
+
+    // Lese die Metadaten aus der Datei
+    mp_int_t size = mp_readinto(f, &m_meta, sizeof(database_meta));
+    if (size != sizeof(database_meta)) {
         ESP_LOGE(TAG, "Failed to read database meta.");
-        fclose(f);
+        mp_close(f);
         return ESP_FAIL;
     }
+
+    // Überprüfe die Feature-Länge
     if (feat_len != m_meta.feat_len) {
         ESP_LOGE(TAG, "Feature len in storage does not match feature len in db.");
-        fclose(f);
+        mp_close(f);
         return ESP_FAIL;
     }
+
     uint16_t id;
     for (int i = 0; i < m_meta.num_feats_total; i++) {
-        size = fread(&id, sizeof(uint16_t), 1, f);
-        if (size != 1) {
+        // Lese die Feature-ID
+        size = mp_readinto(f, &id, sizeof(uint16_t));
+        if (size != sizeof(uint16_t)) {
             ESP_LOGE(TAG, "Failed to read feature id.");
-            fclose(f);
+            mp_close(f);
             return ESP_FAIL;
         }
+
+        // Überspringe ungültige IDs
         if (id == 0) {
-            if (fseek(f, sizeof(float) * m_meta.feat_len, SEEK_CUR) != 0) {
+            if (mp_seek(f, sizeof(float) * m_meta.feat_len, SEEK_CUR) < 0) {
                 ESP_LOGE(TAG, "Failed to seek db file.");
-                fclose(f);
+                mp_close(f);
                 return ESP_FAIL;
             }
             continue;
         }
+
+        // Lese das Feature
         float *feat = (float *)heap_caps_malloc(m_meta.feat_len * sizeof(float), MALLOC_CAP_SPIRAM);
-        size = fread(feat, sizeof(float), m_meta.feat_len, f);
-        if (size != m_meta.feat_len) {
+        size = mp_readinto(f, feat, sizeof(float) * m_meta.feat_len);
+        if (size != (mp_int_t)(sizeof(float) * m_meta.feat_len)) {
             ESP_LOGE(TAG, "Failed to read feature data.");
-            fclose(f);
+            heap_caps_free(feat);
+            mp_close(f);
             return ESP_FAIL;
         }
+
+        // Füge das Feature zur internen Liste hinzu
         m_feats.emplace_back(id, feat);
     }
+
+    // Überprüfe die Anzahl der gültigen Features
     if (m_feats.size() != m_meta.num_feats_valid) {
         ESP_LOGE(TAG, "Incorrect valid feature num.");
-        fclose(f);
+        mp_close(f);
         return ESP_FAIL;
     }
-    fclose(f);
+
+    // Schließe die Datei
+    mp_close(f);
     return ESP_OK;
 }
 
@@ -152,49 +145,64 @@ esp_err_t DataBase::enroll_feat(dl::TensorBase *feat)
         ESP_LOGE(TAG, "Feature len to enroll does not match feature len in db.");
         return ESP_FAIL;
     }
+
+    // Kopiere das Feature in den Speicher
     float *feat_copy = (float *)heap_caps_malloc(m_meta.feat_len * sizeof(float), MALLOC_CAP_SPIRAM);
     memcpy(feat_copy, feat->data, feat->get_bytes());
 
+    // Füge das Feature zur internen Liste hinzu
     m_feats.emplace_back(m_meta.num_feats_total + 1, feat_copy);
     m_meta.num_feats_total++;
     m_meta.num_feats_valid++;
 
-    size_t size = 0;
-    FILE *f = fopen(m_db_path, "rb+");
+    // Öffne die Datei mit `mp_open`
+    mp_file_t *f = mp_open(m_db_path, "rb+");
     if (!f) {
         ESP_LOGE(TAG, "Failed to open db.");
         return ESP_FAIL;
     }
-    size = fwrite(&m_meta, sizeof(mp_esp_dl::recognition::database_meta), 1, f);
-    if (size != 1) {
+
+    // Schreibe die Metadaten in die Datei
+    mp_int_t size = mp_write(f, &m_meta, sizeof(mp_esp_dl::recognition::database_meta));
+    if (size != sizeof(mp_esp_dl::recognition::database_meta)) {
         ESP_LOGE(TAG, "Failed to write database meta.");
-        fclose(f);
+        mp_close(f);
         return ESP_FAIL;
     }
-    if (fseek(f, 0, SEEK_END) != 0) {
+
+    // Setze die Position ans Ende der Datei
+    if (mp_seek(f, 0, SEEK_END) < 0) {
         ESP_LOGE(TAG, "Failed to seek db file.");
-        fclose(f);
+        mp_close(f);
         return ESP_FAIL;
     }
-    size = fwrite(&m_feats.back().id, sizeof(uint16_t), 1, f);
-    if (size != 1) {
+
+    // Schreibe die Feature-ID in die Datei
+    size = mp_write(f, &m_feats.back().id, sizeof(uint16_t));
+    if (size != sizeof(uint16_t)) {
         ESP_LOGE(TAG, "Failed to write feature id.");
-        fclose(f);
+        mp_close(f);
         return ESP_FAIL;
     }
-    size = fwrite(m_feats.back().feat, sizeof(float), m_meta.feat_len, f);
-    if (size != m_meta.feat_len) {
+
+    // Schreibe das Feature in die Datei
+    size = mp_write(f, m_feats.back().feat, sizeof(float) * m_meta.feat_len);
+    if (size != (mp_int_t)(sizeof(float) * m_meta.feat_len)) {
         ESP_LOGE(TAG, "Failed to write feature.");
-        fclose(f);
+        mp_close(f);
         return ESP_FAIL;
     }
-    fclose(f);
+
+    // Schließe die Datei
+    mp_close(f);
     return ESP_OK;
 }
 
 esp_err_t DataBase::delete_feat(uint16_t id)
 {
     bool invalid_id = true;
+
+    // Entferne das Feature aus der internen Liste
     for (auto it = m_feats.begin(); it != m_feats.end();) {
         if (it->id != id) {
             it++;
@@ -206,43 +214,56 @@ esp_err_t DataBase::delete_feat(uint16_t id)
             break;
         }
     }
+
     if (invalid_id) {
         ESP_LOGW(TAG, "Invalid id to delete.");
         return ESP_FAIL;
     }
-    size_t size = 0;
-    FILE *f = fopen(m_db_path, "rb+");
+
+    // Öffne die Datei mit `mp_open`
+    mp_file_t *f = mp_open(m_db_path, "rb+");
     if (!f) {
         ESP_LOGE(TAG, "Failed to open db.");
         return ESP_FAIL;
     }
-    long int offset = sizeof(mp_esp_dl::recognition::database_meta) + (sizeof(uint16_t) + sizeof(float) * m_meta.feat_len) * (id - 1);
+
+    // Berechne den Offset für die zu löschende ID
+    off_t offset = sizeof(mp_esp_dl::recognition::database_meta) +
+                   (sizeof(uint16_t) + sizeof(float) * m_meta.feat_len) * (id - 1);
     uint16_t id_invalid = 0;
-    if (fseek(f, offset, SEEK_SET) != 0) {
+
+    // Setze die Position auf den Offset
+    if (mp_seek(f, offset, SEEK_SET) < 0) {
         ESP_LOGE(TAG, "Failed to seek db file.");
-        fclose(f);
-        return ESP_FAIL;
-    }
-    size = fwrite(&id_invalid, sizeof(uint16_t), 1, f);
-    if (size != 1) {
-        ESP_LOGE(TAG, "Failed to write feature id.");
-        fclose(f);
+        mp_close(f);
         return ESP_FAIL;
     }
 
+    // Schreibe die ungültige ID in die Datei
+    mp_int_t size = mp_write(f, &id_invalid, sizeof(uint16_t));
+    if (size != sizeof(uint16_t)) {
+        ESP_LOGE(TAG, "Failed to write feature id.");
+        mp_close(f);
+        return ESP_FAIL;
+    }
+
+    // Aktualisiere die Anzahl der gültigen Features
     offset = sizeof(uint16_t);
-    if (fseek(f, offset, SEEK_SET) != 0) {
+    if (mp_seek(f, offset, SEEK_SET) < 0) {
         ESP_LOGE(TAG, "Failed to seek db file.");
-        fclose(f);
+        mp_close(f);
         return ESP_FAIL;
     }
-    size = fwrite(&m_meta.num_feats_valid, sizeof(uint16_t), 1, f);
-    if (size != 1) {
+
+    size = mp_write(f, &m_meta.num_feats_valid, sizeof(uint16_t));
+    if (size != sizeof(uint16_t)) {
         ESP_LOGE(TAG, "Failed to write valid feature num.");
-        fclose(f);
+        mp_close(f);
         return ESP_FAIL;
     }
-    fclose(f);
+
+    // Schließe die Datei
+    mp_close(f);
     return ESP_OK;
 }
 
@@ -293,28 +314,21 @@ std::vector<mp_esp_dl::recognition::result_t> DataBase::query_feat(dl::TensorBas
 
 void DataBase::print()
 {
-    printf("\n");
-    printf("[db meta]\nnum_feats_total: %d, num_feats_valid: %d, feat_len: %d\n",
-           m_meta.num_feats_total,
-           m_meta.num_feats_valid,
-           m_meta.feat_len);
-    printf("[feats]\n");
+    mp_printf(&mp_plat_print, "\n");
+    mp_printf(&mp_plat_print, "[db meta]\nnum_feats_total: %d, num_feats_valid: %d, feat_len: %d\n",
+              m_meta.num_feats_total,
+              m_meta.num_feats_valid,
+              m_meta.feat_len);
+    mp_printf(&mp_plat_print, "[feats]\n");
     for (auto it : m_feats) {
-        printf("id: %d feat: ", it.id);
+        mp_printf(&mp_plat_print, "id: %d feat: ", it.id);
         for (int i = 0; i < m_meta.feat_len; i++) {
-            printf("%f, ", it.feat[i]);
+            mp_printf(&mp_plat_print, "%f, ", it.feat[i]);
         }
-        printf("\n");
+        mp_printf(&mp_plat_print, "\n");
     }
-    printf("\n");
+    mp_printf(&mp_plat_print, "\n");
 }
 
 } // namespace recognition
 } // namespace mp_esp_dl
-
-#undef fopen
-#undef fwrite
-#undef fread
-#undef fseek
-#undef fclose
-#undef remove

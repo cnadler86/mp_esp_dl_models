@@ -38,6 +38,7 @@ if (MP_DL_FACE_RECOGNITION_ENABLED)
     target_sources(usermod_mp_esp_dl INTERFACE 
         ${CMAKE_CURRENT_LIST_DIR}/lib/mp_esp_dl_recognition_database.cpp
         ${CMAKE_CURRENT_LIST_DIR}/lib/mp_esp_dl_human_face_recognition.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/lib/mpfile.c
     )
 endif()
 

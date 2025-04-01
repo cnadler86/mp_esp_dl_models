@@ -2,18 +2,16 @@
 dependencies:
   espressif/mdns: "~1.1.0"
   espressif/esp_tinyusb: "~1.0.0"
-  espressif/esp-dl:
-    git: https://github.com/cnadler86/esp-dl.git
   espressif/esp32-camera:
     git: https://github.com/cnadler86/esp32-camera.git
   espressif/esp_new_jpeg: "~0.6.0"
   espressif/human_face_detect:
-    version: "^0.2.0"
+    override_path: ../../esp-dl/models/human_face_detect
   espressif/human_face_recognition:
-    version: "^0.2.0"
+    override_path: ../../esp-dl/models/human_face_recognition
   espressif/pedestrian_detect:
-    version: "^0.2.0"
+    override_path: ../../esp-dl/models/pedestrian_detect
   espressif/imagenet_cls:
-    version: "^0.2.0"
+    override_path: ../../esp-dl/models/imagenet_cls
   idf:
     version: ">=5.3.0"
