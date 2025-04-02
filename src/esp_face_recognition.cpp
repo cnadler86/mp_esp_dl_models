@@ -2,8 +2,8 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/idf_additions.h"
 #include "human_face_detect.hpp"
-// #include "human_face_recognition.hpp"
 #include "lib/mp_esp_dl_human_face_recognition.hpp"
+
 #if MP_DL_FACE_RECOGNITION_ENABLED
 
 namespace mp_esp_dl::recognition {
@@ -17,16 +17,19 @@ struct MP_FaceRecognizer {
     dl::image::img_t img;
     bool return_features;   
     char db_path[64];
+    bool validate_enroll;
 };
 
 // Constructor
 static mp_obj_t face_recognizer_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args) {
-    enum { ARG_img_width, ARG_img_height, ARG_return_features, ARG_db_path };
+    enum { ARG_width, ARG_height, ARG_features, ARG_db_path, ARG_pixelformat, ARG_validate_enroll };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_width, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 320} },
         { MP_QSTR_height, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 240} },
         { MP_QSTR_features, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = true} },
         { MP_QSTR_db_path, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_pixelformat, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = dl::image::DL_IMAGE_PIX_TYPE_RGB888} },
+        { MP_QSTR_validate_enroll, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
     };
 
     mp_arg_val_t parsed_args[MP_ARRAY_SIZE(allowed_args)];
@@ -39,8 +42,6 @@ static mp_obj_t face_recognizer_make_new(const mp_obj_type_t *type, size_t n_arg
         snprintf(self->db_path, sizeof(self->db_path), "/%s", mp_obj_str_get_str(parsed_args[ARG_db_path].u_obj));
     }
     
-    // ESP_ERROR_CHECK(fatfs_flash_mount());
-
     self->FaceDetector = std::make_shared<HumanFaceDetect>();
     self->FaceFeat = std::make_shared<HumanFaceFeat>();
     self->FaceRecognizer = std::make_shared<HumanFaceRecognizer>(self->FaceFeat.get(), self->db_path);
@@ -49,9 +50,10 @@ static mp_obj_t face_recognizer_make_new(const mp_obj_type_t *type, size_t n_arg
         mp_raise_msg(&mp_type_RuntimeError, "Failed to create model instances");
     }
 
-    mp_esp_dl::initialize_img(self->img, parsed_args[ARG_img_width].u_int, parsed_args[ARG_img_height].u_int);
+    mp_esp_dl::initialize_img(self->img, parsed_args[ARG_width].u_int, parsed_args[ARG_height].u_int, 
+                             static_cast<dl::image::pix_type_t>(parsed_args[ARG_pixelformat].u_int));
 
-    self->return_features = parsed_args[ARG_return_features].u_bool;
+    self->return_features = parsed_args[ARG_features].u_bool;
 
     return MP_OBJ_FROM_PTR(self);
 }
@@ -62,7 +64,6 @@ static mp_obj_t face_recognizer_del(mp_obj_t self_in) {
     self->FaceDetector = nullptr;
     self->FaceFeat = nullptr;
     self->FaceRecognizer = nullptr;
-    // ESP_ERROR_CHECK(fatfs_flash_unmount());
     return mp_const_none;
 }
 static MP_DEFINE_CONST_FUN_OBJ_1_CXX(face_recognizer_del_obj, face_recognizer_del);
@@ -86,13 +87,20 @@ static mp_obj_t face_recognizer_enroll(mp_obj_t self_in, mp_obj_t framebuffer_ob
     if (detect_results.size() > 1) {
         mp_raise_ValueError("Only one face can be enrolled at a time");
     }
+    if (self->validate_enroll){
+        auto recon_results = self->FaceRecognizer->recognize(self->img, detect_results);
+        if (!recon_results.empty() && recon_results[0].similarity > 0.99) {
+            mp_warning("espdl", "Face already enrolled");
+            return mp_const_none;
+        }
+    }
 
     self->FaceRecognizer->enroll(self->img, detect_results);
     return mp_const_none;
 }
 static MP_DEFINE_CONST_FUN_OBJ_2_CXX(face_recognizer_enroll_obj, face_recognizer_enroll);
 
-// Detect method
+// Recognize method
 static mp_obj_t face_recognizer_recognize(mp_obj_t self_in, mp_obj_t framebuffer_obj) {
     MP_FaceRecognizer *self = mp_esp_dl::get_and_validate_framebuffer<MP_FaceRecognizer>(self_in, framebuffer_obj);
 

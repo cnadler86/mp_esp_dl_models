@@ -33,7 +33,7 @@ extern const mp_obj_type_t mp_face_recognizer_type;
 # ifdef __cplusplus
 
 namespace mp_esp_dl {
-    void initialize_img(dl::image::img_t &img, int width, int height);
+    void initialize_img(dl::image::img_t &img, int width, int height, dl::image::pix_type_t pix_type = dl::image::DL_IMAGE_PIX_TYPE_RGB888);
 
     template <typename T>
     T *get_and_validate_framebuffer(mp_obj_t self_in, mp_obj_t framebuffer_obj) {
@@ -44,8 +44,9 @@ namespace mp_esp_dl {
         mp_buffer_info_t bufinfo;
         mp_get_buffer_raise(framebuffer_obj, &bufinfo, MP_BUFFER_READ);
 
-        if (bufinfo.len != self->img.width * self->img.height * 3) {
-            mp_raise_ValueError("Frame buffer size does not match the image size with an RGB888 pixel format");
+        size_t expected_size = dl::image::get_img_byte_size(self->img);
+        if (bufinfo.len != expected_size) {
+            mp_raise_ValueError("Frame buffer size does not match the image size with the selected pixel format");
         }
 
         // Assign the buffer data to the image
