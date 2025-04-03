@@ -22,7 +22,7 @@ struct MP_FaceRecognizer {
 
 // Constructor
 static mp_obj_t face_recognizer_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args) {
-    enum { ARG_width, ARG_height, ARG_features, ARG_db_path, ARG_pixelformat, ARG_validate_enroll };
+    enum { ARG_width, ARG_height, ARG_features, ARG_db_path, ARG_pixelformat, ARG_validate_enroll, ARG_model };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_width, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 320} },
         { MP_QSTR_height, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 240} },
@@ -30,6 +30,7 @@ static mp_obj_t face_recognizer_make_new(const mp_obj_type_t *type, size_t n_arg
         { MP_QSTR_db_path, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_obj = mp_const_none} },
         { MP_QSTR_pixelformat, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = dl::image::DL_IMAGE_PIX_TYPE_RGB888} },
         { MP_QSTR_validate_enroll, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
+        { MP_QSTR_model, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_obj = mp_const_none} },
     };
 
     mp_arg_val_t parsed_args[MP_ARRAY_SIZE(allowed_args)];
@@ -43,7 +44,23 @@ static mp_obj_t face_recognizer_make_new(const mp_obj_type_t *type, size_t n_arg
     }
     
     self->FaceDetector = std::make_shared<HumanFaceDetect>();
-    self->FaceFeat = std::make_shared<HumanFaceFeat>();
+
+    if (parsed_args[ARG_model].u_obj == mp_const_none) {
+        self->FaceFeat = std::make_shared<HumanFaceFeat>();
+    } else {
+        const char *model = mp_obj_str_get_str(parsed_args[ARG_model].u_obj);
+
+        if (strcmp(model, "MBF")) {
+            self->FaceFeat = std::make_shared<HumanFaceFeat>(HumanFaceFeat::MBF_S8_V1);
+        } else if (strcmp(model, "MFN")) {
+            self->FaceFeat = std::make_shared<HumanFaceFeat>(HumanFaceFeat::MFN_S8_V1);
+        }
+        else {
+            mp_printf(&mp_plat_print, "Model %s invalid. Using default feature model\n", model);
+            self->FaceFeat = std::make_shared<HumanFaceFeat>();
+        }
+    }
+    
     self->FaceRecognizer = std::make_shared<HumanFaceRecognizer>(self->FaceFeat.get(), self->db_path);
 
     if ((!self->FaceDetector) || (!self->FaceFeat) || (!self->FaceRecognizer)) {
@@ -164,8 +181,7 @@ static const mp_rom_map_elem_t face_recognizer_locals_dict_table[] = {
 static MP_DEFINE_CONST_DICT(face_recognizer_locals_dict, face_recognizer_locals_dict_table);
 
 // Print
-static void print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind)
-{
+static void print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
     mp_printf(print, "Face recognition object");
 }
 

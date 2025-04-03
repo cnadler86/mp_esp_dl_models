@@ -319,14 +319,14 @@ void DataBase::print()
               m_meta.num_feats_total,
               m_meta.num_feats_valid,
               m_meta.feat_len);
-    mp_printf(&mp_plat_print, "[feats]\n");
-    for (auto it : m_feats) {
-        mp_printf(&mp_plat_print, "id: %d feat: ", it.id);
-        for (int i = 0; i < m_meta.feat_len; i++) {
-            mp_printf(&mp_plat_print, "%f, ", it.feat[i]);
-        }
-        mp_printf(&mp_plat_print, "\n");
-    }
+    // mp_printf(&mp_plat_print, "[feats]\n");
+    // for (auto it : m_feats) {
+    //     mp_printf(&mp_plat_print, "id: %d feat: ", it.id);
+    //     for (int i = 0; i < m_meta.feat_len; i++) {
+    //         mp_printf(&mp_plat_print, "%f, ", it.feat[i]);
+    //     }
+    //     mp_printf(&mp_plat_print, "\n");
+    // }
     mp_printf(&mp_plat_print, "\n");
 }
 
