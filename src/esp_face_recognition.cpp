@@ -30,7 +30,9 @@ static mp_obj_t face_recognizer_make_new(const mp_obj_type_t *type, size_t n_arg
         { MP_QSTR_db_path, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_obj = mp_const_none} },
         { MP_QSTR_pixelformat, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = dl::image::DL_IMAGE_PIX_TYPE_RGB888} },
         { MP_QSTR_validate_enroll, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
+    #if CONFIG_HUMAN_FACE_FEAT_MFN_S8_V1 && CONFIG_HUMAN_FACE_FEAT_MBF_S8_V1
         { MP_QSTR_model, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_obj = mp_const_none} },
+    #endif
     };
 
     mp_arg_val_t parsed_args[MP_ARRAY_SIZE(allowed_args)];
@@ -45,8 +47,11 @@ static mp_obj_t face_recognizer_make_new(const mp_obj_type_t *type, size_t n_arg
     
     self->FaceDetector = std::make_shared<HumanFaceDetect>();
 
+#if CONFIG_HUMAN_FACE_FEAT_MFN_S8_V1 && CONFIG_HUMAN_FACE_FEAT_MBF_S8_V1
     if (parsed_args[ARG_model].u_obj == mp_const_none) {
+#endif
         self->FaceFeat = std::make_shared<HumanFaceFeat>();
+#if CONFIG_HUMAN_FACE_FEAT_MFN_S8_V1 && CONFIG_HUMAN_FACE_FEAT_MBF_S8_V1
     } else {
         const char *model = mp_obj_str_get_str(parsed_args[ARG_model].u_obj);
 
@@ -60,7 +65,7 @@ static mp_obj_t face_recognizer_make_new(const mp_obj_type_t *type, size_t n_arg
             self->FaceFeat = std::make_shared<HumanFaceFeat>();
         }
     }
-    
+#endif
     self->FaceRecognizer = std::make_shared<HumanFaceRecognizer>(self->FaceFeat.get(), self->db_path);
 
     if ((!self->FaceDetector) || (!self->FaceFeat) || (!self->FaceRecognizer)) {
