@@ -12,8 +12,9 @@ To use any of the modules, you need to import them first. Here is how you can im
 
 ```python
 from espdl import FaceDetector
-from espdl import ImageNet
+from espdl import FaceRecognizer
 from espdl import PedestrianDetector
+from espdl import ImageNet
 ```
 
 ## FaceDetector Module
@@ -29,28 +30,30 @@ face_detector = FaceDetector(width=320, height=240, features=True)
 - **Detect Faces**
 
   ```python
-  results = face_detector.detect(framebuffer)
+  results = face_detector.run(framebuffer)
   ```
 
   - `framebuffer`: The image data to be processed in RGB888 format.
 
-## ImageNet Module
+## FaceREcognizer Module
 
-To create an instance of the `ImageNet`:
+To create an instance of the `FaceDetector`:
 
 ```python
-image_net = ImageNet(width=320, height=240)
+FR = FaceRecognizer(width=320, height=240, db_path="MyFaces.db", )
 ```
 
-### ImageNet Methods
+`db_path` is optional.
 
-- **Classify Image**
+### Enroll a face (save it to the DB)
+```python
+RF.enroll(Img)
+```
 
-  ```python
-  results = image_net.detect(framebuffer)
-  ```
-
-  - `framebuffer`: The image data to be processed in RGB888 format.
+### Recognize a face
+```python
+FaceIDandSimilarity = RF.run(Img)
+```
 
 ## PedestrianDetector Module
 
@@ -65,10 +68,28 @@ pedestrian_detector = PedestrianDetector(width=320, height=240)
 - **Detect Pedestrians**
 
   ```python
-  results = pedestrian_detector.detect(framebuffer)
+  results = pedestrian_detector.run(framebuffer)
   ```
 
   - `framebuffer`: The image data to be processed.
+
+## ImageNet Module
+
+To create an instance of the `ImageNet`:
+
+```python
+image_net = ImageNet(width=320, height=240)
+```
+
+### ImageNet Methods
+
+- **Classify Image**
+
+  ```python
+  results = image_net.run(framebuffer)
+  ```
+
+  - `framebuffer`: The image data to be processed in RGB888 format.
 
 ## Example Usage
 

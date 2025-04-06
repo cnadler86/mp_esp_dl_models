@@ -177,7 +177,7 @@ static MP_DEFINE_CONST_FUN_OBJ_1_CXX(face_recognizer_print_database_obj, face_re
 
 // Local dict
 static const mp_rom_map_elem_t face_recognizer_locals_dict_table[] = {
-    { MP_ROM_QSTR(MP_QSTR_recognize), MP_ROM_PTR(&face_recognizer_recognize_obj) },
+    { MP_ROM_QSTR(MP_QSTR_run), MP_ROM_PTR(&face_recognizer_recognize_obj) },
     { MP_ROM_QSTR(MP_QSTR_enroll), MP_ROM_PTR(&face_recognizer_enroll_obj) },
     { MP_ROM_QSTR(MP_QSTR_pixelformat), MP_ROM_PTR(&face_recognizer_set_pixelformat_obj) },
     { MP_ROM_QSTR(MP_QSTR_print_database), MP_ROM_PTR(&face_recognizer_print_database_obj) },

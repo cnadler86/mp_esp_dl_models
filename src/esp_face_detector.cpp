@@ -86,15 +86,14 @@ static MP_DEFINE_CONST_FUN_OBJ_2_CXX(face_detector_detect_obj, face_detector_det
 
 // Local dict
 static const mp_rom_map_elem_t face_detector_locals_dict_table[] = {
-    { MP_ROM_QSTR(MP_QSTR_detect), MP_ROM_PTR(&face_detector_detect_obj) },
+    { MP_ROM_QSTR(MP_QSTR_run), MP_ROM_PTR(&face_detector_detect_obj) },
     { MP_ROM_QSTR(MP_QSTR_pixelformat), MP_ROM_PTR(&face_detector_set_pixelformat_obj) },
     { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&face_detector_del_obj) },
 };
 static MP_DEFINE_CONST_DICT(face_detector_locals_dict, face_detector_locals_dict_table);
 
 // Print
-static void print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind)
-{
+static void print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
     mp_printf(print, "Face detector object");
 }
 

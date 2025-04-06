@@ -44,35 +44,34 @@ static mp_obj_t image_net_del(mp_obj_t self_in) {
 }
 static MP_DEFINE_CONST_FUN_OBJ_1_CXX(image_net_del_obj, image_net_del);
 
-// Detect method
-static mp_obj_t image_net_detect(mp_obj_t self_in, mp_obj_t framebuffer_obj) {
+// classify method
+static mp_obj_t image_net_classify(mp_obj_t self_in, mp_obj_t framebuffer_obj) {
     MP_ImageNetCls *self = mp_esp_dl::get_and_validate_framebuffer<MP_ImageNetCls>(self_in, framebuffer_obj);
 
-    auto &detect_results = self->model->run(self->img);
+    auto &classify_results = self->model->run(self->img);
 
-    if (detect_results.size() == 0) {
+    if (classify_results.size() == 0) {
         return mp_const_none;
     }
 
     mp_obj_t list = mp_obj_new_list(0, NULL);
-    for (const auto &res : detect_results) {
+    for (const auto &res : classify_results) {
         mp_obj_list_append(list, mp_obj_new_str_from_cstr(res.cat_name));
         mp_obj_list_append(list, mp_obj_new_float(res.score));
     }
     return list;
 }
-static MP_DEFINE_CONST_FUN_OBJ_2_CXX(image_net_detect_obj, image_net_detect);
+static MP_DEFINE_CONST_FUN_OBJ_2_CXX(image_net_classify_obj, image_net_classify);
 
 // Local dict
 static const mp_rom_map_elem_t image_net_locals_dict_table[] = {
-    { MP_ROM_QSTR(MP_QSTR_detect), MP_ROM_PTR(&image_net_detect_obj) },
+    { MP_ROM_QSTR(MP_QSTR_run), MP_ROM_PTR(&image_net_classify_obj) },
     { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&image_net_del_obj) },
 };
 static MP_DEFINE_CONST_DICT(image_net_locals_dict, image_net_locals_dict_table);
 
 // Print
-static void print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind)
-{
+static void print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
     mp_printf(print, "Imagenet classifier object");
 }
 
