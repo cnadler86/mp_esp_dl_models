@@ -62,12 +62,16 @@ static mp_obj_t pedestrian_detector_detect(mp_obj_t self_in, mp_obj_t framebuffe
 
     mp_obj_t list = mp_obj_new_list(0, NULL);
     for (const auto &res : detect_results) {
-        mp_obj_list_append(list, mp_obj_new_float(res.score));
+        mp_obj_t dict = mp_obj_new_dict(2);
+        mp_obj_dict_store(dict, mp_obj_new_str_from_cstr("score"), mp_obj_new_float(res.score));
+
         mp_obj_t tuple[4];
         for (int i = 0; i < 4; ++i) {
             tuple[i] = mp_obj_new_int(res.box[i]);
         }
-        mp_obj_list_append(list, mp_obj_new_tuple(4, tuple));
+        mp_obj_dict_store(dict, mp_obj_new_str_from_cstr("box"), mp_obj_new_tuple(4, tuple));
+        
+        mp_obj_list_append(list, dict);
     }
     return list;
 }

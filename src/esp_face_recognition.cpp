@@ -132,36 +132,72 @@ static mp_obj_t face_recognizer_recognize(mp_obj_t self_in, mp_obj_t framebuffer
 
     mp_obj_t list = mp_obj_new_list(0, NULL);
     for (const auto &res : detect_results) {
-        mp_obj_list_append(list, mp_obj_new_float(res.score));
+        mp_obj_t dict = mp_obj_new_dict(4);
+        mp_obj_dict_store(dict, mp_obj_new_str_from_cstr("score"), mp_obj_new_float(res.score));
+
         mp_obj_t tuple[4];
         for (int i = 0; i < 4; ++i) {
             tuple[i] = mp_obj_new_int(res.box[i]);
         }
-        mp_obj_list_append(list, mp_obj_new_tuple(4, tuple));
-        
-        std::list<dl::detect::result_t> single_result_list = { res };
-        auto recon_results = self->FaceRecognizer->recognize(self->img, single_result_list);
-
-        if(recon_results.size() == 0) {
-            mp_obj_list_append(list, mp_const_none);
-        } else {
-            for (const auto &recon : recon_results) {
-                mp_obj_t tuple[2];
-                tuple[0] = mp_obj_new_int(recon.id);
-                tuple[1] = mp_obj_new_float(recon.similarity);
-                mp_obj_list_append(list, mp_obj_new_tuple(2, tuple));
-            }
-        }
-
+        mp_obj_dict_store(dict, mp_obj_new_str_from_cstr("box"), mp_obj_new_tuple(4, tuple));
+    
         if (self->return_features) {
             mp_obj_t features[10];
             for (int i = 0; i < 10; ++i) {
                 features[i] = mp_obj_new_int(res.keypoint[i]);
             }
-            mp_obj_list_append(list, mp_obj_new_tuple(10, features));
+            mp_obj_dict_store(dict, mp_obj_new_str_from_cstr("features"), mp_obj_new_tuple(10, features));
         }
+        else {
+            mp_obj_dict_store(dict, mp_obj_new_str_from_cstr("features"), mp_const_none);
+        }
+        
+        std::list<dl::detect::result_t> single_result_list = { res };
+        auto recon_results = self->FaceRecognizer->recognize(self->img, single_result_list);
+        if(recon_results.size() == 0) {
+            mp_obj_dict_store(dict, mp_obj_new_str_from_cstr("person"), mp_const_none);
+        } else {
+            mp_obj_t tuple[2];
+            tuple[0] = mp_obj_new_int(recon_results[0].id);
+            tuple[1] = mp_obj_new_float(recon_results[0].similarity);
+            mp_obj_dict_store(dict, mp_obj_new_str_from_cstr("person"), mp_obj_new_tuple(2, tuple));
+        }
+        mp_obj_list_append(list, dict);
     }
     return list;
+
+    // mp_obj_t list = mp_obj_new_list(0, NULL);
+    // for (const auto &res : detect_results) {
+    //     mp_obj_list_append(list, mp_obj_new_float(res.score));
+    //     mp_obj_t tuple[4];
+    //     for (int i = 0; i < 4; ++i) {
+    //         tuple[i] = mp_obj_new_int(res.box[i]);
+    //     }
+    //     mp_obj_list_append(list, mp_obj_new_tuple(4, tuple));
+        
+    //     std::list<dl::detect::result_t> single_result_list = { res };
+    //     auto recon_results = self->FaceRecognizer->recognize(self->img, single_result_list);
+
+    //     if(recon_results.size() == 0) {
+    //         mp_obj_list_append(list, mp_const_none);
+    //     } else {
+    //         for (const auto &recon : recon_results) {
+    //             mp_obj_t tuple[2];
+    //             tuple[0] = mp_obj_new_int(recon.id);
+    //             tuple[1] = mp_obj_new_float(recon.similarity);
+    //             mp_obj_list_append(list, mp_obj_new_tuple(2, tuple));
+    //         }
+    //     }
+
+    //     if (self->return_features) {
+    //         mp_obj_t features[10];
+    //         for (int i = 0; i < 10; ++i) {
+    //             features[i] = mp_obj_new_int(res.keypoint[i]);
+    //         }
+    //         mp_obj_list_append(list, mp_obj_new_tuple(10, features));
+    //     }
+    // }
+    // return list;
 }
 static MP_DEFINE_CONST_FUN_OBJ_2_CXX(face_recognizer_recognize_obj, face_recognizer_recognize);
 
