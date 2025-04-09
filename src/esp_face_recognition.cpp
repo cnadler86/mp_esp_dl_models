@@ -90,12 +90,10 @@ static mp_obj_t face_recognizer_del(mp_obj_t self_in) {
 }
 static MP_DEFINE_CONST_FUN_OBJ_1_CXX(face_recognizer_del_obj, face_recognizer_del);
 
-// Set width and height
-static mp_obj_t face_recognizer_set_pixelformat(mp_obj_t self_in, mp_obj_t width_obj, mp_obj_t height_obj) {
-    set_width_and_height<MP_FaceRecognizer>(self_in, mp_obj_get_int(width_obj), mp_obj_get_int(height_obj));
-    return mp_const_none;
+// Get and set methods
+static void face_recognizer_attr(mp_obj_t self_in, qstr attr, mp_obj_t *dest) {
+    mp_esp_dl::espdl_obj_property<MP_FaceRecognizer>(self_in, attr, dest);
 }
-static MP_DEFINE_CONST_FUN_OBJ_3_CXX(face_recognizer_set_pixelformat_obj, face_recognizer_set_pixelformat);
 
 // Enroll method
 static mp_obj_t face_recognizer_enroll(mp_obj_t self_in, mp_obj_t framebuffer_obj) {
@@ -179,7 +177,6 @@ static MP_DEFINE_CONST_FUN_OBJ_1_CXX(face_recognizer_print_database_obj, face_re
 static const mp_rom_map_elem_t face_recognizer_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_run), MP_ROM_PTR(&face_recognizer_recognize_obj) },
     { MP_ROM_QSTR(MP_QSTR_enroll), MP_ROM_PTR(&face_recognizer_enroll_obj) },
-    { MP_ROM_QSTR(MP_QSTR_pixelformat), MP_ROM_PTR(&face_recognizer_set_pixelformat_obj) },
     { MP_ROM_QSTR(MP_QSTR_print_database), MP_ROM_PTR(&face_recognizer_print_database_obj) },
     { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&face_recognizer_del_obj) },
 };
@@ -199,6 +196,7 @@ MP_DEFINE_CONST_OBJ_TYPE(
     MP_TYPE_FLAG_NONE,
     make_new, (const void *)mp_esp_dl::recognition::face_recognizer_make_new,
     print, (const void *)mp_esp_dl::recognition::print,
+    attr, (const void *)mp_esp_dl::recognition::face_recognizer_attr,
     locals_dict, &mp_esp_dl::recognition::face_recognizer_locals_dict
 );
 

@@ -44,6 +44,11 @@ static mp_obj_t image_net_del(mp_obj_t self_in) {
 }
 static MP_DEFINE_CONST_FUN_OBJ_1_CXX(image_net_del_obj, image_net_del);
 
+// Get and set methods
+static void image_net_attr(mp_obj_t self_in, qstr attr, mp_obj_t *dest) {
+    mp_esp_dl::espdl_obj_property<MP_ImageNetCls>(self_in, attr, dest);
+}
+
 // classify method
 static mp_obj_t image_net_classify(mp_obj_t self_in, mp_obj_t framebuffer_obj) {
     MP_ImageNetCls *self = mp_esp_dl::get_and_validate_framebuffer<MP_ImageNetCls>(self_in, framebuffer_obj);
@@ -84,6 +89,7 @@ MP_DEFINE_CONST_OBJ_TYPE(
     MP_TYPE_FLAG_NONE,
     make_new, (const void *)mp_esp_dl::imagenet::image_net_make_new,
     print, (const void *)mp_esp_dl::imagenet::print,
+    attr, (const void *)mp_esp_dl::imagenet::image_net_attr,
     locals_dict, &mp_esp_dl::imagenet::image_net_locals_dict
 );
 

@@ -49,21 +49,44 @@ namespace mp_esp_dl {
             mp_raise_ValueError("Frame buffer size does not match the image size with the selected pixel format");
         }
 
-        // Assign the buffer data to the image
         self->img.data = (uint8_t *)bufinfo.buf;
 
         return self;
     }
 
     template <typename T>
-    void set_width_and_height(mp_obj_t self_in, int width, int height) {
-        // Cast self_in to the correct type
+    void espdl_obj_property(mp_obj_t self_in, qstr attr, mp_obj_t *dest) {
         T *self = static_cast<T *>(MP_OBJ_TO_PTR(self_in));
-
-        // Set the width and height
-        self->img.width = width;
-        self->img.height = height;
-        self->img.data = nullptr;
+        if (dest[0] == MP_OBJ_NULL) {
+            switch (attr) {
+                case MP_QSTR_width:
+                    dest[0] = mp_obj_new_int(self->img.width);
+                    break;
+                case MP_QSTR_height:
+                    dest[0] = mp_obj_new_int(self->img.height);
+                    break;
+                case MP_QSTR_pix_type:
+                    dest[0] = mp_obj_new_int(self->img.pix_type);
+                    break;
+                default:
+                    dest[1] = MP_OBJ_SENTINEL;
+            }
+        } else if (dest[1] != MP_OBJ_NULL) {
+            switch (attr) {
+                case MP_QSTR_width:
+                    self->img.width = mp_obj_get_int(dest[1]);
+                    break;
+                case MP_QSTR_height:
+                    self->img.height = mp_obj_get_int(dest[1]);
+                    break;
+                case MP_QSTR_pix_type:
+                    self->img.pix_type = static_cast<dl::image::pix_type_t>(mp_obj_get_int(dest[1]));
+                    break;
+                default:
+                    return;
+            }
+            dest[0] = MP_OBJ_NULL;
+        }
     }
 }
 

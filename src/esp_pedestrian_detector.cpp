@@ -45,12 +45,10 @@ static mp_obj_t pedestrian_detector_del(mp_obj_t self_in) {
 }
 static MP_DEFINE_CONST_FUN_OBJ_1_CXX(pedestrian_detector_del_obj, pedestrian_detector_del);
 
-// Set width and height
-static mp_obj_t pedestrian_detector_set_pixelformat(mp_obj_t self_in, mp_obj_t width_obj, mp_obj_t height_obj) {
-    set_width_and_height<MP_PedestrianDetector>(self_in, mp_obj_get_int(width_obj), mp_obj_get_int(height_obj));
-    return mp_const_none;
+// Get and set methods
+static void pedestrian_detector_attr(mp_obj_t self_in, qstr attr, mp_obj_t *dest) {
+    mp_esp_dl::espdl_obj_property<MP_PedestrianDetector>(self_in, attr, dest);
 }
-static MP_DEFINE_CONST_FUN_OBJ_3_CXX(pedestrian_detector_set_pixelformat_obj, pedestrian_detector_set_pixelformat);
 
 // Detect method
 static mp_obj_t pedestrian_detector_detect(mp_obj_t self_in, mp_obj_t framebuffer_obj) {
@@ -78,7 +76,6 @@ static MP_DEFINE_CONST_FUN_OBJ_2_CXX(pedestrian_detector_detect_obj, pedestrian_
 // Local dict
 static const mp_rom_map_elem_t pedestrian_detector_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_run), MP_ROM_PTR(&pedestrian_detector_detect_obj) },
-    { MP_ROM_QSTR(MP_QSTR_pixelformat), MP_ROM_PTR(&pedestrian_detector_set_pixelformat_obj) },
     { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&pedestrian_detector_del_obj) },
 };
 static MP_DEFINE_CONST_DICT(pedestrian_detector_locals_dict, pedestrian_detector_locals_dict_table);
@@ -97,6 +94,7 @@ MP_DEFINE_CONST_OBJ_TYPE(
     MP_TYPE_FLAG_NONE,
     make_new, (const void *)mp_esp_dl::PedestrianDetector::pedestrian_detector_make_new,
     print, (const void *)mp_esp_dl::PedestrianDetector::print,
+    attr, (const void *)mp_esp_dl::PedestrianDetector::pedestrian_detector_attr,
     locals_dict, &mp_esp_dl::PedestrianDetector::pedestrian_detector_locals_dict
 );
 
