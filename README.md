@@ -105,7 +105,7 @@ face_detector = FaceDetector()
 framebuffer = decoder.decode(cam.capture())
 
 # Detect faces
-results = face_detector.detect(framebuffer)
+results = face_detector.run(framebuffer)
 
 # Process results
 if results:
