@@ -4,7 +4,7 @@ This is a micropython binding for the esp dl models `FaceDetector`, `ImageNet`, 
 
 ## Precompiled images
 
-You may find precompiled images in the actions section for passed workflows under artifacts. You can also form the repo and start the action manually in order to build the library.
+You may find precompiled images in the actions section for passed workflows under artifacts. You can also fork the repo and start the action manually in order to build the library.
 
 ## Importing Modules
 
