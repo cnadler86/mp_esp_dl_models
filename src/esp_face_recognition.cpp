@@ -97,10 +97,10 @@ static mp_obj_t face_recognizer_enroll(mp_obj_t self_in, mp_obj_t framebuffer_ob
     auto &detect_results = self->model->run(self->img);
 
     if (detect_results.size() == 0) {
-        mp_raise_ValueError("No face detected");
+        mp_raise_ValueError("No face detected.");
     }
     if (detect_results.size() > 1) {
-        mp_raise_ValueError("Only one face can be enrolled at a time");
+        mp_raise_ValueError("Only one face can be enrolled at a time.");
     }
     if (self->validate_enroll){
         auto recon_results = self->FaceRecognizer->recognize(self->img, detect_results);
@@ -110,10 +110,23 @@ static mp_obj_t face_recognizer_enroll(mp_obj_t self_in, mp_obj_t framebuffer_ob
         }
     }
 
-    self->FaceRecognizer->enroll(self->img, detect_results);
+    if (self->FaceRecognizer->enroll(self->img, detect_results) != ESP_OK) {
+        mp_raise_ValueError("Failed to enroll face.");
+    }
     return mp_const_none;
 }
 static MP_DEFINE_CONST_FUN_OBJ_2_CXX(face_recognizer_enroll_obj, face_recognizer_enroll);
+
+// Delete feature method
+static mp_obj_t face_recognizer_delete_feature(mp_obj_t self_in, mp_obj_t id) {
+    MP_FaceRecognizer *self = static_cast<MP_FaceRecognizer *>(MP_OBJ_TO_PTR(self_in));
+    int id_num = mp_obj_get_int(id);
+    if (self->FaceRecognizer->delete_feat(id_num) != ESP_OK) {
+        mp_raise_ValueError("Failed to delete feature.");
+    }
+    return mp_const_none;
+}
+static MP_DEFINE_CONST_FUN_OBJ_2_CXX(face_recognizer_delete_feature_obj, face_recognizer_delete_feature);
 
 // Recognize method
 static mp_obj_t face_recognizer_recognize(mp_obj_t self_in, mp_obj_t framebuffer_obj) {
@@ -175,6 +188,7 @@ static MP_DEFINE_CONST_FUN_OBJ_1_CXX(face_recognizer_print_database_obj, face_re
 static const mp_rom_map_elem_t face_recognizer_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_run), MP_ROM_PTR(&face_recognizer_recognize_obj) },
     { MP_ROM_QSTR(MP_QSTR_enroll), MP_ROM_PTR(&face_recognizer_enroll_obj) },
+    { MP_ROM_QSTR(MP_QSTR_delete_face), MP_ROM_PTR(&face_recognizer_delete_feature_obj) },
     { MP_ROM_QSTR(MP_QSTR_print_database), MP_ROM_PTR(&face_recognizer_print_database_obj) },
     { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&face_recognizer_del_obj) },
 };
@@ -182,7 +196,8 @@ static MP_DEFINE_CONST_DICT(face_recognizer_locals_dict, face_recognizer_locals_
 
 // Print
 static void print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
-    mp_printf(print, "Face recognition object");
+    MP_FaceRecognizer *self = static_cast<MP_FaceRecognizer *>(MP_OBJ_TO_PTR(self_in));
+    mp_printf(print, "Face recognition object with total of %d features", self->FaceRecognizer->get_num_feats());
 }
 
 } //namespace

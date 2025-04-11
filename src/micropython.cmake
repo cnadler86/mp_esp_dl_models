@@ -28,7 +28,7 @@ endif()
 target_sources(usermod_mp_esp_dl INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/esp_face_detector.cpp
 	${CMAKE_CURRENT_LIST_DIR}/esp_face_recognition.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/esp_pedestrian_detector.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/esp_human_detector.cpp
     ${CMAKE_CURRENT_LIST_DIR}/esp_imagenet_cls.cpp
     ${CMAKE_CURRENT_LIST_DIR}/mp_esp_dl_module.c
 )
