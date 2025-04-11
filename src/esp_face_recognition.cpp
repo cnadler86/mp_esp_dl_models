@@ -52,15 +52,11 @@ static mp_obj_t face_recognizer_make_new(const mp_obj_type_t *type, size_t n_arg
 #if CONFIG_HUMAN_FACE_FEAT_MFN_S8_V1 && CONFIG_HUMAN_FACE_FEAT_MBF_S8_V1
     } else {
         const char *model = mp_obj_str_get_str(parsed_args[ARG_model].u_obj);
-
         if (strcmp(model, "MBF") == 0) {
-            mp_printf(&mp_plat_print, "Using MBF model with enum value %d.\n", HumanFaceFeat::MBF_S8_V1);
             self->FaceFeat = std::make_shared<HumanFaceFeat>(HumanFaceFeat::MBF_S8_V1);
         } else if (strcmp(model, "MFN") == 0) {
-            mp_printf(&mp_plat_print, "Using MFN model with enum value %d.\n", HumanFaceFeat::MFN_S8_V1);
             self->FaceFeat = std::make_shared<HumanFaceFeat>(HumanFaceFeat::MFN_S8_V1);
-        }
-        else {
+        } else {
             mp_printf(&mp_plat_print, "Model %s invalid. Using default feature model\n", model);
             self->FaceFeat = std::make_shared<HumanFaceFeat>();
         }
