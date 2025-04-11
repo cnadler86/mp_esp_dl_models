@@ -71,8 +71,10 @@
     <script>
         function receiveDataFromBackend(data) {
             console.log("Received data:", data);
+            if (!data) return;
             document.querySelectorAll('.bounding-box').forEach(box => box.remove());
-            if (!Array.isArray(data) || data.length == 0) return;
+            
+            if (!Array.isArray(data) || data.length === 0) return;
 
             const videoContainer = document.getElementById('video-container');
             const video = document.getElementById('video');
@@ -83,8 +85,6 @@
             const offsetX = videoRect.left - containerRect.left;
             const offsetY = videoRect.top - containerRect.top;
 
-            console.log("video natural size:", video.naturalWidth, video.naturalHeight);
-            console.log("video displayed size:", video.clientWidth, video.clientHeight);
             const scaleX = video.clientWidth / video.naturalWidth;
             const scaleY = video.clientHeight / video.naturalHeight;
 
@@ -98,7 +98,7 @@
                 box.style.top = `${offsetY + y1 * scaleY}px`;
                 box.style.width = `${(x2 - x1) * scaleX}px`;
                 box.style.height = `${(y2 - y1) * scaleY}px`;
-                console.log(`Width: ${box.style.width}, hieght: ${box.style.height}`)
+
                 const boxLabel = document.createElement('div');
                 boxLabel.className = 'bounding-box-label';
                 boxLabel.innerText = label;
@@ -231,6 +231,14 @@
     <div class="container">
         <div class="settings-container">
             <div class="setting">
+                <label for="model">Model:</label>
+                <select id="model">
+                    <option value="FaceDetector">FaceDetector</option>
+                    <option value="FaceRecognizer">FaceRecognizer</option>
+                    <option value="HumanDetector">HumanDetector</option>
+                </select>
+            </div>
+            <div class="setting">
                 <label for="frame_size">Frame Size:</label>
                 <select id="frame_size">
                     <option value="0">R96x96</option>
@@ -263,6 +271,10 @@
             <div class="setting">
                 <label for="quality" title="Quality above 90% may lead to freezing the camera at high resolutions.">JPEG quality:</label>
                 <input type="range" id="quality" min="0" max="100">
+            </div>
+            <div class="setting">
+                <label for="fb_count" title="Either 1 or 2">FB count:</label>
+                <input type="range" id="fb_count" min="1" max="2">
             </div>
             <div class="setting">
                 <label for="contrast">Contrast:</label>

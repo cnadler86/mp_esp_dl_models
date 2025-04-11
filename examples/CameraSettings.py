@@ -28,15 +28,15 @@ except Exception as e:
     raise e
 
 BB = None
-FD = None
+Model = None
 
 async def stream_camera(writer):
     global BB
-    global FD
+    global Model
     try:
         cam.init()
         cam.set_vflip(True)
-        FD = FaceDetector(features=False, width=cam.get_pixel_width(), height=cam.get_pixel_height())
+        Model = espdl.FaceDetector(width=cam.get_pixel_width(), height=cam.get_pixel_height())
         Dec = Decoder()
         await asyncio.sleep(1)
         
@@ -48,7 +48,7 @@ async def stream_camera(writer):
             if frame:
                 writer.write(b'--frame\r\nContent-Type: image/jpeg\r\n\r\n')
                 writer.write(frame)
-                BB = FD.run(Dec.decode(frame))
+                BB = Model.run(Dec.decode(frame))
                 await writer.drain()
                 
     finally:
@@ -58,6 +58,7 @@ async def stream_camera(writer):
         print("Streaming stopped and camera deinitialized.")
 
 async def handle_client(reader, writer):
+    global Model
     try:
         request = await reader.read(1024)
         request = request.decode()
@@ -68,28 +69,46 @@ async def handle_client(reader, writer):
         elif 'GET /get_boxes' in request:
             bounding_boxes = []
             if BB is not None:
-                length = len(BB)
-                for i in range(0, length, 2):
-                    temp = [{ "x1": BB[i+1][0], "y1": BB[i+1][1], "x2": BB[i+1][2], "y2": BB[i+1][3], "label": f"Score {BB[i]}" }]
-                    bounding_boxes.append(temp)
+                for box in BB:
+                    bounding_boxes.append(
+                        { "x1":box['box'][0],
+                          "y1":box['box'][1],
+                          "x2":box['box'][2],
+                          "y2":box['box'][3],
+                          "label":f"Score {box['score']}"})
             response = 'HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n' + json.dumps(bounding_boxes)
             writer.write(response.encode())
             await writer.drain()
         elif 'GET /set_' in request:
             method_name = request.split('GET /set_')[1].split('?')[0]
+            if method_name == "model":
+                model_name = request.split('value=')[1].split(' ')[0]
+                ModelClass = getattr(espdl, model_name)
+                Model = ModelClass(width=cam.get_pixel_width(), height=cam.get_pixel_height())
+                response = 'HTTP/1.1 200 OK\r\n\r\n'
+                writer.write(response.encode())
+                await writer.drain()
+                return
             value = int(request.split('value=')[1].split(' ')[0])
             set_method = getattr(cam, f'set_{method_name}', None)
             if callable(set_method):
-                print(f"setting {method_name} to {value}")
                 set_method(value)
+                print(f"{method_name} setted to {value}")
                 if method_name == 'frame_size':
-                    FD.width=cam.get_pixel_width()
-                    FD.height=cam.get_pixel_height()
+                    Model.width=cam.get_pixel_width()
+                    Model.height=cam.get_pixel_height()
                 response = 'HTTP/1.1 200 OK\r\n\r\n'
                 writer.write(response.encode())
                 await writer.drain()
             else:
-                response = 'HTTP/1.1 404 Not Found\r\n\r\n'
+                try:
+                    cam.reconfigure(**{method_name: value})
+                    print(f"Camera reconfigured with {method_name}={value}")
+                    print("This action restores all previous configuration!")
+                    response = 'HTTP/1.1 200 OK\r\n\r\n'
+                except Exception as e:
+                    print(f"Error with {method_name}: {e}")
+                    response = 'HTTP/1.1 404 Not Found\r\n\r\n'
                 writer.write(response.encode())
                 await writer.drain()
 
@@ -98,14 +117,19 @@ async def handle_client(reader, writer):
             get_method = getattr(cam, f'get_{method_name}', None)
             if callable(get_method):
                 value = get_method()
-                print(f"{method_name} is {value}")
                 response = f'HTTP/1.1 200 OK\r\n\r\n{value}'
                 writer.write(response.encode())
                 await writer.drain()
             else:
-                response = 'HTTP/1.1 404 Not Found\r\n\r\n'
+                if method_name == "model" and Model is not None:
+                    value = Model.__class__.__name__
+                    response = f'HTTP/1.1 200 OK\r\n\r\n{value}'
+                    pass
+                else:
+                    response = 'HTTP/1.1 404 Not Found\r\n\r\n'
                 writer.write(response.encode())
                 await writer.drain()
+            print(f"{method_name} is {value}")
 
         else:
             writer.write('HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n'.encode() + html.encode())
@@ -118,7 +142,9 @@ async def handle_client(reader, writer):
 
 async def start_server():
     server = await asyncio.start_server(handle_client, "0.0.0.0", 80)
-    print(f'Server is running on {station.ifconfig()[0]}:80')
+    ip_address = station.ifconfig()[0]
+    print(f'Server is running on http://{ip_address}')
+    
     while True:
         await asyncio.sleep(3600)
 
