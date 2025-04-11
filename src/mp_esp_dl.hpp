@@ -11,7 +11,7 @@ extern "C" {
 
 extern const mp_obj_type_t mp_face_detector_type;
 extern const mp_obj_type_t mp_image_net_type;
-extern const mp_obj_type_t mp_pedestrian_detector_type;
+extern const mp_obj_type_t mp_human_detector_type;
 extern const mp_obj_type_t mp_face_recognizer_type;
 
 #define MP_DEFINE_CONST_FUN_OBJ_0_CXX(obj_name, fun_name) \
@@ -33,7 +33,30 @@ extern const mp_obj_type_t mp_face_recognizer_type;
 # ifdef __cplusplus
 
 namespace mp_esp_dl {
-    void initialize_img(dl::image::img_t &img, int width, int height, dl::image::pix_type_t pix_type = dl::image::DL_IMAGE_PIX_TYPE_RGB888);
+
+    template <typename TModel>
+    struct MP_DetectorBase {
+        mp_obj_base_t base;
+        dl::image::img_t img;
+        std::shared_ptr<TModel> model;
+    };
+
+    template <typename TDetector, typename TModel>
+    TDetector* make_new(const mp_obj_type_t* type, int width, int height, dl::image::pix_type_t pix_type = dl::image::DL_IMAGE_PIX_TYPE_RGB888) {
+        TDetector* self = mp_obj_malloc_with_finaliser(TDetector, type);
+        self->model = std::make_shared<TModel>();
+    
+        if (!self->model) {
+            mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("Failed to create model instance."));
+        }
+
+        self->img.width = width;
+        self->img.height = height;
+        self->img.pix_type = pix_type;
+        self->img.data = nullptr;
+    
+        return self;
+    }
 
     template <typename T>
     T *get_and_validate_framebuffer(mp_obj_t self_in, mp_obj_t framebuffer_obj) {
@@ -46,7 +69,7 @@ namespace mp_esp_dl {
 
         size_t expected_size = dl::image::get_img_byte_size(self->img);
         if (bufinfo.len != expected_size) {
-            mp_raise_ValueError("Frame buffer size does not match the image size with the selected pixel format");
+            mp_raise_ValueError("Frame buffer size does not match the image size with the selected pixel format.");
         }
 
         self->img.data = (uint8_t *)bufinfo.buf;

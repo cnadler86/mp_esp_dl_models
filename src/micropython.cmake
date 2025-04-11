@@ -1,20 +1,3 @@
-function(add_esp_component_includes)
-
-    cmake_parse_arguments(COMPONENT_INCL "" "TARGET" "COMPONENTS" ${ARGV})
-
-    foreach(_this_component ${COMPONENT_INCL_COMPONENTS})
-
-        idf_component_get_property(_this_include ${_this_component} INCLUDE_DIRS)
-
-        if (_this_include)
-            idf_component_get_property(_this_dir ${_this_component} COMPONENT_DIR)
-            list(TRANSFORM _this_include PREPEND ${_this_dir}/)
-            target_include_directories(${COMPONENT_INCL_TARGET} INTERFACE ${_this_include})
-        endif()
-
-    endforeach()
-endfunction()
-
 include(${MICROPY_DIR}/py/py.cmake)
 
 add_library(usermod_mp_esp_dl INTERFACE)
@@ -48,7 +31,6 @@ target_sources(usermod_mp_esp_dl INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/esp_pedestrian_detector.cpp
     ${CMAKE_CURRENT_LIST_DIR}/esp_imagenet_cls.cpp
     ${CMAKE_CURRENT_LIST_DIR}/mp_esp_dl_module.c
-    ${CMAKE_CURRENT_LIST_DIR}/mp_esp_dl.cpp
 )
 
 target_include_directories(usermod_mp_esp_dl INTERFACE

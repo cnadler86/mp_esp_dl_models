@@ -5,10 +5,7 @@
 namespace mp_esp_dl::FaceDetector {
 
 // Object
-struct MP_FaceDetector {
-    mp_obj_base_t base;
-    std::shared_ptr<HumanFaceDetect> model = nullptr;
-    dl::image::img_t img;
+struct MP_FaceDetector : public MP_DetectorBase<HumanFaceDetect> {
     bool return_features;
 };
 
@@ -24,15 +21,10 @@ static mp_obj_t face_detector_make_new(const mp_obj_type_t *type, size_t n_args,
     mp_arg_val_t parsed_args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all_kw_array(n_args, n_kw, args, MP_ARRAY_SIZE(allowed_args), allowed_args, parsed_args);
 
-    MP_FaceDetector *self = mp_obj_malloc_with_finaliser(MP_FaceDetector, &mp_face_detector_type);
-    self->model = std::make_shared<HumanFaceDetect>();
-    
-    if (!self->model) {
-        mp_raise_msg(&mp_type_RuntimeError, "Failed to create model instance");
-    }
-
-    mp_esp_dl::initialize_img(self->img, parsed_args[ARG_img_width].u_int, parsed_args[ARG_img_height].u_int);
-
+    MP_FaceDetector *self = mp_esp_dl::make_new<MP_FaceDetector, HumanFaceDetect>(
+        &mp_face_detector_type, 
+        parsed_args[ARG_img_width].u_int, 
+        parsed_args[ARG_img_height].u_int);
     self->return_features = parsed_args[ARG_return_features].u_bool;
 
     return MP_OBJ_FROM_PTR(self);

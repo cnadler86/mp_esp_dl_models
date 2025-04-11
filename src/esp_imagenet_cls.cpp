@@ -7,10 +7,7 @@
 namespace mp_esp_dl::imagenet {
 
 // Object
-struct MP_ImageNetCls {
-    mp_obj_base_t base;
-    std::shared_ptr<ImageNetCls> model = nullptr;
-    dl::image::img_t img;
+struct MP_ImageNetCls : public MP_DetectorBase<ImageNetCls> {
 };
 
 // Constructor
@@ -24,15 +21,10 @@ static mp_obj_t image_net_make_new(const mp_obj_type_t *type, size_t n_args, siz
     mp_arg_val_t parsed_args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all_kw_array(n_args, n_kw, args, MP_ARRAY_SIZE(allowed_args), allowed_args, parsed_args);
 
-    MP_ImageNetCls *self = mp_obj_malloc_with_finaliser(MP_ImageNetCls, &mp_image_net_type);
-    self->model = std::make_shared<ImageNetCls>();
-    
-    if (!self->model) {
-        mp_raise_msg(&mp_type_RuntimeError, "Failed to create model instance");
-    }
-
-    mp_esp_dl::initialize_img(self->img, parsed_args[ARG_img_width].u_int, parsed_args[ARG_img_height].u_int);
-
+    MP_ImageNetCls *self = mp_esp_dl::make_new<MP_ImageNetCls, ImageNetCls>(
+        &mp_image_net_type, 
+        parsed_args[ARG_img_width].u_int, 
+        parsed_args[ARG_img_height].u_int);
     return MP_OBJ_FROM_PTR(self);
 }
 

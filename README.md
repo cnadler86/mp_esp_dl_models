@@ -1,6 +1,6 @@
 # ESP DL MicroPython Binding
 
-This is a micropython binding for the esp dl models `FaceDetector`, `ImageNet`, and `PedestrianDetector`.
+This is a micropython binding for the esp dl models `FaceDetector`, `ImageNet`, and `HumanDetector`.
 
 ## Precompiled images
 
@@ -13,7 +13,7 @@ To use any of the modules, you need to import them first. Here is how you can im
 ```python
 from espdl import FaceDetector
 from espdl import FaceRecognizer
-from espdl import PedestrianDetector
+from espdl import HumanDetector
 from espdl import ImageNet
 ```
 
@@ -55,15 +55,15 @@ RF.enroll(Img)
 FaceIDandSimilarity = RF.run(Img)
 ```
 
-## PedestrianDetector Module
+## HumanDetector Module
 
-To create an instance of the `PedestrianDetector`:
+To create an instance of the `HumanDetector`:
 
 ```python
-pedestrian_detector = PedestrianDetector(width=320, height=240)
+pedestrian_detector = HumanDetector(width=320, height=240)
 ```
 
-### PedestrianDetector Methods
+### HumanDetector Methods
 
 - **Detect Pedestrians**
 
@@ -118,8 +118,8 @@ if results:
 
 - The `results` data for face detection includes the detection score and bounding box coordinates `[x1, y1, x2, y2]`.
 - If `features` are enabled, the `results` also include keypoints for facial features in x-y coordinates: left eye, left mouth, nose, right eye, right mouth.
-Similarly, you can use the `ImageNet` and `PedestrianDetector` modules by following the same pattern.
-`ImageNet` returns the identified classes and respective scores, `PedestrianDetector` only score and bounding box.
+Similarly, you can use the `ImageNet` and `HumanDetector` modules by following the same pattern.
+`ImageNet` returns the identified classes and respective scores, `HumanDetector` only score and bounding box.
 
 ## Notes
 

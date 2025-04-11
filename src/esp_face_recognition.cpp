@@ -9,20 +9,17 @@
 namespace mp_esp_dl::recognition {
 
 // Object
-struct MP_FaceRecognizer {
-    mp_obj_base_t base;
-    std::shared_ptr<HumanFaceDetect> FaceDetector;
-    std::shared_ptr<HumanFaceFeat> FaceFeat;
-    std::shared_ptr<HumanFaceRecognizer> FaceRecognizer;
-    dl::image::img_t img;
-    bool return_features;   
+struct MP_FaceRecognizer : public MP_DetectorBase<HumanFaceDetect> {
+    std::shared_ptr<HumanFaceFeat> FaceFeat = nullptr;
+    std::shared_ptr<HumanFaceRecognizer> FaceRecognizer = nullptr;
+    bool return_features;
     char db_path[64];
     bool validate_enroll;
 };
 
 // Constructor
 static mp_obj_t face_recognizer_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args) {
-    enum { ARG_width, ARG_height, ARG_features, ARG_db_path, ARG_pixelformat, ARG_validate_enroll, ARG_model };
+    enum { ARG_img_width, ARG_img_height, ARG_features, ARG_db_path, ARG_pixelformat, ARG_validate_enroll, ARG_model };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_width, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 320} },
         { MP_QSTR_height, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 240} },
@@ -38,14 +35,15 @@ static mp_obj_t face_recognizer_make_new(const mp_obj_type_t *type, size_t n_arg
     mp_arg_val_t parsed_args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all_kw_array(n_args, n_kw, args, MP_ARRAY_SIZE(allowed_args), allowed_args, parsed_args);
 
-    MP_FaceRecognizer *self = mp_obj_malloc_with_finaliser(MP_FaceRecognizer, &mp_face_recognizer_type);
+    MP_FaceRecognizer *self = mp_esp_dl::make_new<MP_FaceRecognizer, HumanFaceDetect>(
+        &mp_face_recognizer_type, 
+        parsed_args[ARG_img_width].u_int, 
+        parsed_args[ARG_img_height].u_int);
 
     strncpy(self->db_path, "/face.db", sizeof(self->db_path));
     if (parsed_args[ARG_db_path].u_obj != mp_const_none) {
         snprintf(self->db_path, sizeof(self->db_path), "/%s", mp_obj_str_get_str(parsed_args[ARG_db_path].u_obj));
     }
-    
-    self->FaceDetector = std::make_shared<HumanFaceDetect>();
 
 #if CONFIG_HUMAN_FACE_FEAT_MFN_S8_V1 && CONFIG_HUMAN_FACE_FEAT_MBF_S8_V1
     if (parsed_args[ARG_model].u_obj == mp_const_none) {
@@ -68,12 +66,9 @@ static mp_obj_t face_recognizer_make_new(const mp_obj_type_t *type, size_t n_arg
 #endif
     self->FaceRecognizer = std::make_shared<HumanFaceRecognizer>(self->FaceFeat.get(), self->db_path);
 
-    if ((!self->FaceDetector) || (!self->FaceFeat) || (!self->FaceRecognizer)) {
+    if ((!self->FaceFeat) || (!self->FaceRecognizer)) {
         mp_raise_msg(&mp_type_RuntimeError, "Failed to create model instances");
     }
-
-    mp_esp_dl::initialize_img(self->img, parsed_args[ARG_width].u_int, parsed_args[ARG_height].u_int, 
-                             static_cast<dl::image::pix_type_t>(parsed_args[ARG_pixelformat].u_int));
 
     self->return_features = parsed_args[ARG_features].u_bool;
 
@@ -83,7 +78,7 @@ static mp_obj_t face_recognizer_make_new(const mp_obj_type_t *type, size_t n_arg
 // Destructor
 static mp_obj_t face_recognizer_del(mp_obj_t self_in) {
     MP_FaceRecognizer *self = static_cast<MP_FaceRecognizer *>(MP_OBJ_TO_PTR(self_in));
-    self->FaceDetector = nullptr;
+    self->model = nullptr;
     self->FaceFeat = nullptr;
     self->FaceRecognizer = nullptr;
     return mp_const_none;
@@ -99,7 +94,7 @@ static void face_recognizer_attr(mp_obj_t self_in, qstr attr, mp_obj_t *dest) {
 static mp_obj_t face_recognizer_enroll(mp_obj_t self_in, mp_obj_t framebuffer_obj) {
     MP_FaceRecognizer *self = mp_esp_dl::get_and_validate_framebuffer<MP_FaceRecognizer>(self_in, framebuffer_obj);
 
-    auto &detect_results = self->FaceDetector->run(self->img);
+    auto &detect_results = self->model->run(self->img);
 
     if (detect_results.size() == 0) {
         mp_raise_ValueError("No face detected");
@@ -109,8 +104,8 @@ static mp_obj_t face_recognizer_enroll(mp_obj_t self_in, mp_obj_t framebuffer_ob
     }
     if (self->validate_enroll){
         auto recon_results = self->FaceRecognizer->recognize(self->img, detect_results);
-        if (!recon_results.empty() && recon_results[0].similarity > 0.99) {
-            mp_warning("espdl", "Face already enrolled");
+        if (!recon_results.empty() && recon_results[0].similarity > 0.9) {
+            mp_warning("espdl", "Face already enrolled. id: %d, similarity: %f", recon_results[0].id, recon_results[0].similarity);
             return mp_const_none;
         }
     }
@@ -124,7 +119,7 @@ static MP_DEFINE_CONST_FUN_OBJ_2_CXX(face_recognizer_enroll_obj, face_recognizer
 static mp_obj_t face_recognizer_recognize(mp_obj_t self_in, mp_obj_t framebuffer_obj) {
     MP_FaceRecognizer *self = mp_esp_dl::get_and_validate_framebuffer<MP_FaceRecognizer>(self_in, framebuffer_obj);
 
-    auto &detect_results = self->FaceDetector->run(self->img);
+    auto &detect_results = self->model->run(self->img);
 
     if (detect_results.size() == 0) {
         return mp_const_none;
@@ -165,39 +160,6 @@ static mp_obj_t face_recognizer_recognize(mp_obj_t self_in, mp_obj_t framebuffer
         mp_obj_list_append(list, dict);
     }
     return list;
-
-    // mp_obj_t list = mp_obj_new_list(0, NULL);
-    // for (const auto &res : detect_results) {
-    //     mp_obj_list_append(list, mp_obj_new_float(res.score));
-    //     mp_obj_t tuple[4];
-    //     for (int i = 0; i < 4; ++i) {
-    //         tuple[i] = mp_obj_new_int(res.box[i]);
-    //     }
-    //     mp_obj_list_append(list, mp_obj_new_tuple(4, tuple));
-        
-    //     std::list<dl::detect::result_t> single_result_list = { res };
-    //     auto recon_results = self->FaceRecognizer->recognize(self->img, single_result_list);
-
-    //     if(recon_results.size() == 0) {
-    //         mp_obj_list_append(list, mp_const_none);
-    //     } else {
-    //         for (const auto &recon : recon_results) {
-    //             mp_obj_t tuple[2];
-    //             tuple[0] = mp_obj_new_int(recon.id);
-    //             tuple[1] = mp_obj_new_float(recon.similarity);
-    //             mp_obj_list_append(list, mp_obj_new_tuple(2, tuple));
-    //         }
-    //     }
-
-    //     if (self->return_features) {
-    //         mp_obj_t features[10];
-    //         for (int i = 0; i < 10; ++i) {
-    //             features[i] = mp_obj_new_int(res.keypoint[i]);
-    //         }
-    //         mp_obj_list_append(list, mp_obj_new_tuple(10, features));
-    //     }
-    // }
-    // return list;
 }
 static MP_DEFINE_CONST_FUN_OBJ_2_CXX(face_recognizer_recognize_obj, face_recognizer_recognize);
 
