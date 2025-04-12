@@ -87,11 +87,12 @@ static void face_recognizer_attr(mp_obj_t self_in, qstr attr, mp_obj_t *dest) {
 
 // Enroll method
 static mp_obj_t face_recognizer_enroll(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_framebuffer, ARG_validate };
+    enum { ARG_self, ARG_framebuffer, ARG_validate, ARG_name };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },  // self
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },  // framebuffer
         { MP_QSTR_validate, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
+        { MP_QSTR_name, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_obj = mp_const_none} },
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
@@ -118,12 +119,17 @@ static mp_obj_t face_recognizer_enroll(size_t n_args, const mp_obj_t *pos_args, 
         }
     }
 
-    if (self->FaceRecognizer->enroll(self->img, detect_results) != ESP_OK) {
+    const char* name = "";
+    if (args[ARG_name].u_obj != mp_const_none) {
+        name = mp_obj_str_get_str(args[ARG_name].u_obj);
+    }
+
+    if (self->FaceRecognizer->enroll(self->img, detect_results, name) != ESP_OK) {
         mp_raise_ValueError("Failed to enroll face.");
     }
     return mp_const_none;
 }
-static MP_DEFINE_CONST_FUN_OBJ_KW(face_recognizer_enroll_obj, 2, face_recognizer_enroll);
+static MP_DEFINE_CONST_FUN_OBJ_KW_CXX(face_recognizer_enroll_obj, 2, face_recognizer_enroll);
 
 // Delete feature method
 static mp_obj_t face_recognizer_delete_feature(mp_obj_t self_in, mp_obj_t id) {
@@ -173,10 +179,19 @@ static mp_obj_t face_recognizer_recognize(mp_obj_t self_in, mp_obj_t framebuffer
         if(recon_results.size() == 0) {
             mp_obj_dict_store(dict, mp_obj_new_str_from_cstr("person"), mp_const_none);
         } else {
-            mp_obj_t tuple[2];
-            tuple[0] = mp_obj_new_int(recon_results[0].id);
-            tuple[1] = mp_obj_new_float(recon_results[0].similarity);
-            mp_obj_dict_store(dict, mp_obj_new_str_from_cstr("person"), mp_obj_new_tuple(2, tuple));
+            mp_obj_t person_dict = mp_obj_new_dict(3);
+            mp_obj_dict_store(person_dict, mp_obj_new_str_from_cstr("id"), mp_obj_new_int(recon_results[0].id));
+            mp_obj_dict_store(person_dict, mp_obj_new_str_from_cstr("similarity"), mp_obj_new_float(recon_results[0].similarity));
+            
+            // Füge den Namen hinzu, wenn er nicht leer ist
+            if (recon_results[0].name[0] != '\0') {
+                mp_obj_dict_store(person_dict, mp_obj_new_str_from_cstr("name"), 
+                                mp_obj_new_str(recon_results[0].name, strlen(recon_results[0].name)));
+            } else {
+                mp_obj_dict_store(person_dict, mp_obj_new_str_from_cstr("name"), mp_const_none);
+            }
+            
+            mp_obj_dict_store(dict, mp_obj_new_str_from_cstr("person"), person_dict);
         }
         mp_obj_list_append(list, dict);
     }

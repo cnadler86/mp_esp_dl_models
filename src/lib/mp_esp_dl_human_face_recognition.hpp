@@ -44,5 +44,5 @@ public:
 
     std::vector<mp_esp_dl::recognition::result_t> recognize(const dl::image::img_t &img,
                                                      std::list<dl::detect::result_t> &detect_res);
-    esp_err_t enroll(const dl::image::img_t &img, std::list<dl::detect::result_t> &detect_res);
+    esp_err_t enroll(const dl::image::img_t &img, std::list<dl::detect::result_t> &detect_res, const char *name = "");
 };

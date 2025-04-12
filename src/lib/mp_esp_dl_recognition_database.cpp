@@ -1,11 +1,11 @@
 #include "mp_esp_dl_recognition_database.hpp"
 #include <unistd.h>
 
-extern "C" {
-    #include "py/runtime.h" // Für mp_load_method und mp_call_method_n_kw
-    #include "py/obj.h" // Für mp_printf
-    #include "mpfile.h"
-}
+// extern "C" {
+//     #include "py/runtime.h" // Für mp_load_method und mp_call_method_n_kw
+//     #include "py/obj.h" // Für mp_printf
+//     #include "mpfile.h"
+// }
 
 static const char *TAG = "mp_esp_dl::recognition::DataBase";
 
@@ -100,7 +100,7 @@ esp_err_t DataBase::load_database_from_storage(int feat_len)
 
         // Überspringe ungültige IDs
         if (id == 0) {
-            if (mp_seek(f, sizeof(float) * m_meta.feat_len, SEEK_CUR) < 0) {
+            if (mp_seek(f, sizeof(float) * m_meta.feat_len + MAX_NAME_LENGTH, SEEK_CUR) < 0) {
                 ESP_LOGE(TAG, "Failed to seek db file.");
                 mp_close(f);
                 return ESP_FAIL;
@@ -118,8 +118,18 @@ esp_err_t DataBase::load_database_from_storage(int feat_len)
             return ESP_FAIL;
         }
 
+        // Lese den Namen
+        char name[MAX_NAME_LENGTH];
+        size = mp_readinto(f, name, MAX_NAME_LENGTH);
+        if (size != MAX_NAME_LENGTH) {
+            ESP_LOGE(TAG, "Failed to read name.");
+            heap_caps_free(feat);
+            mp_close(f);
+            return ESP_FAIL;
+        }
+
         // Füge das Feature zur internen Liste hinzu
-        m_feats.emplace_back(id, feat);
+        m_feats.emplace_back(id, feat, name);
     }
 
     // Überprüfe die Anzahl der gültigen Features
@@ -134,7 +144,7 @@ esp_err_t DataBase::load_database_from_storage(int feat_len)
     return ESP_OK;
 }
 
-esp_err_t DataBase::enroll_feat(dl::TensorBase *feat)
+esp_err_t DataBase::enroll_feat(dl::TensorBase *feat, const char *name)
 {
     ESP_LOGI(TAG, "Enrolling feature.");
     if (feat->dtype != dl::DATA_TYPE_FLOAT) {
@@ -151,7 +161,7 @@ esp_err_t DataBase::enroll_feat(dl::TensorBase *feat)
     memcpy(feat_copy, feat->data, feat->get_bytes());
 
     // Füge das Feature zur internen Liste hinzu
-    m_feats.emplace_back(m_meta.num_feats_total + 1, feat_copy);
+    m_feats.emplace_back(m_meta.num_feats_total + 1, feat_copy, name);
     m_meta.num_feats_total++;
     m_meta.num_feats_valid++;
 
@@ -193,6 +203,14 @@ esp_err_t DataBase::enroll_feat(dl::TensorBase *feat)
         return ESP_FAIL;
     }
 
+    // Schreibe den Namen in die Datei
+    size = mp_write(f, m_feats.back().name, MAX_NAME_LENGTH);
+    if (size != MAX_NAME_LENGTH) {
+        ESP_LOGE(TAG, "Failed to write name.");
+        mp_close(f);
+        return ESP_FAIL;
+    }
+
     // Schließe die Datei
     mp_close(f);
     return ESP_OK;
@@ -229,7 +247,7 @@ esp_err_t DataBase::delete_feat(uint16_t id)
 
     // Berechne den Offset für die zu löschende ID
     off_t offset = sizeof(mp_esp_dl::recognition::database_meta) +
-                   (sizeof(uint16_t) + sizeof(float) * m_meta.feat_len) * (id - 1);
+                   (sizeof(uint16_t) + sizeof(float) * m_meta.feat_len + MAX_NAME_LENGTH) * (id - 1);
     uint16_t id_invalid = 0;
 
     // Setze die Position auf den Offset
@@ -294,14 +312,12 @@ std::vector<mp_esp_dl::recognition::result_t> DataBase::query_feat(dl::TensorBas
     }
     std::vector<mp_esp_dl::recognition::result_t> results;
     float sim;
-    int i = 1;
-    for (auto it = m_feats.begin(); it != m_feats.end(); it++, i++) {
+    for (auto it = m_feats.begin(); it != m_feats.end(); it++) {
         sim = cal_similarity(it->feat, (float *)feat->data);
         if (sim <= thr) {
             continue;
         }
-        // results.emplace_back(it->id, sim);
-        results.emplace_back(i, sim);
+        results.emplace_back(it->id, sim, it->name);
     }
     std::sort(results.begin(), results.end(), [](const mp_esp_dl::recognition::result_t &a, const mp_esp_dl::recognition::result_t &b) -> bool {
         return a.similarity > b.similarity;
@@ -312,21 +328,31 @@ std::vector<mp_esp_dl::recognition::result_t> DataBase::query_feat(dl::TensorBas
     return results;
 }
 
+const char* DataBase::get_name(uint16_t id)
+{
+    for (const auto &feat : m_feats) {
+        if (feat.id == id) {
+            return feat.name;
+        }
+    }
+    return "";
+}
+
 void DataBase::print()
 {
     mp_printf(&mp_plat_print, "\n");
-    mp_printf(&mp_plat_print, "[db meta]\nnum_feats_total: %d, num_feats_valid: %d, feat_len: %d\n",
-              m_meta.num_feats_total,
-              m_meta.num_feats_valid,
-              m_meta.feat_len);
-    // mp_printf(&mp_plat_print, "[feats]\n");
-    // for (auto it : m_feats) {
-    //     mp_printf(&mp_plat_print, "id: %d feat: ", it.id);
-    //     for (int i = 0; i < m_meta.feat_len; i++) {
-    //         mp_printf(&mp_plat_print, "%f, ", it.feat[i]);
-    //     }
-    //     mp_printf(&mp_plat_print, "\n");
-    // }
+    mp_printf(&mp_plat_print, "[Database Info]\n");
+    mp_printf(&mp_plat_print, "Total faces: %d, Valid faces: %d\n\n", 
+              m_meta.num_feats_total, 
+              m_meta.num_feats_valid);
+              
+    if (!m_feats.empty()) {
+        mp_printf(&mp_plat_print, "ID  | Name\n");
+        mp_printf(&mp_plat_print, "----+--------------------------------\n");
+        for (const auto &feat : m_feats) {
+            mp_printf(&mp_plat_print, "%-3d | %s\n", feat.id, feat.name[0] != '\0' ? feat.name : "<no name>");
+        }
+    }
     mp_printf(&mp_plat_print, "\n");
 }
 
