@@ -59,12 +59,12 @@
             z-index: 10;
         }
         .bounding-box-label {
-            background-color: rgba(255, 0, 0, 0.7);
+            background-color: rgba(0, 102, 255, 0.7);
             color: white;
             font-size: 12px;
             padding: 2px 4px;
             position: absolute;
-            top: -18px;
+            top: -20px;
             left: 0;
         }
     </style>
@@ -89,7 +89,7 @@
             const scaleY = video.clientHeight / video.naturalHeight;
 
             data.forEach(item => {
-                const { x1, y1, x2, y2, label } = item;
+                const { x1, y1, x2, y2, label, color } = item;
 
                 const box = document.createElement('div');
                 box.className = 'bounding-box';
@@ -102,6 +102,10 @@
                 const boxLabel = document.createElement('div');
                 boxLabel.className = 'bounding-box-label';
                 boxLabel.innerText = label;
+                
+                if (color) {
+                    box.style.borderColor = color;
+                }
 
                 box.appendChild(boxLabel);
                 videoContainer.appendChild(box);

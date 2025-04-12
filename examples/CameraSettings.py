@@ -3,14 +3,16 @@ import asyncio
 import time
 from acamera import Camera, FrameSize, PixelFormat # Import the async version of the Camera class, you can also use the sync version (camera.Camera)
 from jpeg import Decoder
-from espdl import FaceDetector
+import espdl
 import json
 
 cam = Camera(fb_count=1, frame_size=FrameSize.VGA, pixel_format=PixelFormat.JPEG, jpeg_quality=85, init=False)
 # WLAN config
 ssid = 'SSID'
 password = 'PWD'
+BoxSettings = {'color': {85: "green", 60: "yellow", 0: "red"}}
 
+# Connect to Wi-Fi
 station = network.WLAN(network.STA_IF)
 station.active(True)
 station.connect(ssid, password)
@@ -29,6 +31,12 @@ except Exception as e:
 
 BB = None
 Model = None
+
+def LookupTable(value, dictionary):
+    for key in sorted(dictionary.keys(), reverse=True):
+        if value >= key:
+            return dictionary[key]
+    return None
 
 async def stream_camera(writer):
     global BB
@@ -70,12 +78,14 @@ async def handle_client(reader, writer):
             bounding_boxes = []
             if BB is not None:
                 for box in BB:
+                    color = LookupTable(box['score']*100, BoxSettings['color'])
                     bounding_boxes.append(
                         { "x1":box['box'][0],
                           "y1":box['box'][1],
                           "x2":box['box'][2],
                           "y2":box['box'][3],
-                          "label":f"Score {box['score']}"})
+                          "label":f"Score: {box['score']*100:.2f}%",
+                          "color":color})
             response = 'HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n' + json.dumps(bounding_boxes)
             writer.write(response.encode())
             await writer.drain()

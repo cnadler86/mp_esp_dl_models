@@ -14,19 +14,16 @@ struct MP_FaceRecognizer : public MP_DetectorBase<HumanFaceDetect> {
     std::shared_ptr<HumanFaceRecognizer> FaceRecognizer = nullptr;
     bool return_features;
     char db_path[64];
-    bool validate_enroll;
 };
 
 // Constructor
 static mp_obj_t face_recognizer_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args) {
-    enum { ARG_img_width, ARG_img_height, ARG_features, ARG_db_path, ARG_pixelformat, ARG_validate_enroll, ARG_model };
+    enum { ARG_img_width, ARG_img_height, ARG_features, ARG_db_path, ARG_model };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_width, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 320} },
         { MP_QSTR_height, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 240} },
         { MP_QSTR_features, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = true} },
         { MP_QSTR_db_path, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_obj = mp_const_none} },
-        { MP_QSTR_pixelformat, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = dl::image::DL_IMAGE_PIX_TYPE_RGB888} },
-        { MP_QSTR_validate_enroll, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
     #if CONFIG_HUMAN_FACE_FEAT_MFN_S8_V1 && CONFIG_HUMAN_FACE_FEAT_MBF_S8_V1
         { MP_QSTR_model, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_obj = mp_const_none} },
     #endif
@@ -89,8 +86,19 @@ static void face_recognizer_attr(mp_obj_t self_in, qstr attr, mp_obj_t *dest) {
 }
 
 // Enroll method
-static mp_obj_t face_recognizer_enroll(mp_obj_t self_in, mp_obj_t framebuffer_obj) {
-    MP_FaceRecognizer *self = mp_esp_dl::get_and_validate_framebuffer<MP_FaceRecognizer>(self_in, framebuffer_obj);
+static mp_obj_t face_recognizer_enroll(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_framebuffer, ARG_validate };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },  // self
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },  // framebuffer
+        { MP_QSTR_validate, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
+    };
+
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    MP_FaceRecognizer *self = mp_esp_dl::get_and_validate_framebuffer<MP_FaceRecognizer>(args[ARG_self].u_obj, args[ARG_framebuffer].u_obj);
+    bool validate = args[ARG_validate].u_bool;
 
     auto &detect_results = self->model->run(self->img);
 
@@ -100,7 +108,9 @@ static mp_obj_t face_recognizer_enroll(mp_obj_t self_in, mp_obj_t framebuffer_ob
     if (detect_results.size() > 1) {
         mp_raise_ValueError("Only one face can be enrolled at a time.");
     }
-    if (self->validate_enroll){
+    
+    // Only validate if explicitly requested
+    if (validate) {
         auto recon_results = self->FaceRecognizer->recognize(self->img, detect_results);
         if (!recon_results.empty() && recon_results[0].similarity > 0.9) {
             mp_warning("espdl", "Face already enrolled. id: %d, similarity: %f", recon_results[0].id, recon_results[0].similarity);
@@ -113,7 +123,7 @@ static mp_obj_t face_recognizer_enroll(mp_obj_t self_in, mp_obj_t framebuffer_ob
     }
     return mp_const_none;
 }
-static MP_DEFINE_CONST_FUN_OBJ_2_CXX(face_recognizer_enroll_obj, face_recognizer_enroll);
+static MP_DEFINE_CONST_FUN_OBJ_KW(face_recognizer_enroll_obj, 2, face_recognizer_enroll);
 
 // Delete feature method
 static mp_obj_t face_recognizer_delete_feature(mp_obj_t self_in, mp_obj_t id) {
