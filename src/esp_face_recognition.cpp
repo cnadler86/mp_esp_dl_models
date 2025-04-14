@@ -124,10 +124,12 @@ static mp_obj_t face_recognizer_enroll(size_t n_args, const mp_obj_t *pos_args, 
         name = mp_obj_str_get_str(args[ARG_name].u_obj);
     }
 
-    if (self->FaceRecognizer->enroll(self->img, detect_results, name) != ESP_OK) {
+    uint16_t new_id;
+    if (self->FaceRecognizer->enroll(self->img, detect_results, name, &new_id) != ESP_OK) {
         mp_raise_ValueError("Failed to enroll face.");
     }
-    return mp_const_none;
+
+    return mp_obj_new_int(new_id);
 }
 static MP_DEFINE_CONST_FUN_OBJ_KW_CXX(face_recognizer_enroll_obj, 2, face_recognizer_enroll);
 

@@ -26,7 +26,7 @@ public:
     DataBase(const char *db_path, int feat_len);
     virtual ~DataBase();
     esp_err_t clear_all_feats();
-    esp_err_t enroll_feat(dl::TensorBase *feat, const char *name = "");
+    esp_err_t enroll_feat(dl::TensorBase *feat, const char *name = "", uint16_t *out_id = nullptr);
     esp_err_t delete_feat(uint16_t id);
     esp_err_t delete_last_feat();
     std::vector<result_t> query_feat(dl::TensorBase *feat, float thr, int top_k);
