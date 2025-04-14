@@ -144,7 +144,8 @@ esp_err_t DataBase::load_database_from_storage(int feat_len)
     return ESP_OK;
 }
 
-esp_err_t DataBase::enroll_feat(dl::TensorBase *feat, const char *name, uint16_t *out_id) {
+esp_err_t DataBase::enroll_feat(dl::TensorBase *feat, const char *name, uint16_t *new_id)
+{
     ESP_LOGI(TAG, "Enrolling feature.");
     if (feat->dtype != dl::DATA_TYPE_FLOAT) {
         ESP_LOGE(TAG, "Only support float feature.");
@@ -159,9 +160,11 @@ esp_err_t DataBase::enroll_feat(dl::TensorBase *feat, const char *name, uint16_t
     float *feat_copy = (float *)heap_caps_malloc(m_meta.feat_len * sizeof(float), MALLOC_CAP_SPIRAM);
     memcpy(feat_copy, feat->data, feat->get_bytes());
 
+    // Neue ID generieren
+    uint16_t id = m_meta.num_feats_total + 1;
+
     // Füge das Feature zur internen Liste hinzu
-    uint16_t new_id = m_meta.num_feats_total + 1;
-    m_feats.emplace_back(new_id, feat_copy, name);
+    m_feats.emplace_back(id, feat_copy, name);
     m_meta.num_feats_total++;
     m_meta.num_feats_valid++;
 
@@ -188,7 +191,7 @@ esp_err_t DataBase::enroll_feat(dl::TensorBase *feat, const char *name, uint16_t
     }
 
     // Schreibe die Feature-ID in die Datei
-    size = mp_write(f, &new_id, sizeof(uint16_t));
+    size = mp_write(f, &m_feats.back().id, sizeof(uint16_t));
     if (size != sizeof(uint16_t)) {
         ESP_LOGE(TAG, "Failed to write feature id.");
         mp_close(f);
@@ -211,14 +214,11 @@ esp_err_t DataBase::enroll_feat(dl::TensorBase *feat, const char *name, uint16_t
         return ESP_FAIL;
     }
 
-    // Schließe die Datei
     mp_close(f);
-
-    // Setze die neue ID zurück
-    if (out_id) {
-        *out_id = new_id;
-    }
-
+    
+    // Setze die neue ID
+    *new_id = id;
+    
     return ESP_OK;
 }
 

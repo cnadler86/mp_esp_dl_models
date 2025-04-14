@@ -79,13 +79,16 @@ async def handle_client(reader, writer):
             if BB is not None:
                 for box in BB:
                     color = LookupTable(box['score']*100, BoxSettings['color'])
-                    bounding_boxes.append(
-                        { "x1":box['box'][0],
-                          "y1":box['box'][1],
-                          "x2":box['box'][2],
-                          "y2":box['box'][3],
-                          "label":f"Score: {box['score']*100:.2f}%",
-                          "color":color})
+                    Dict = {"x1":box['box'][0],
+                            "y1":box['box'][1],
+                            "x2":box['box'][2],
+                            "y2":box['box'][3],
+                            "label":f"Score: {box['score']*100:.0f}%",
+                            "color":color}
+                    if Model.__class__.__name__ == "FaceRecognizer":
+                        if box['person'] is not None:   
+                            Dict['label'] = f"{box['person']['name']} ({box['person']['similarity']*100:.0f}%), Score: {box['score']*100:.0f}%"
+                    bounding_boxes.append(Dict)
             response = 'HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n' + json.dumps(bounding_boxes)
             writer.write(response.encode())
             await writer.drain()

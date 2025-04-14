@@ -4,7 +4,7 @@
 #include "freertos/queue.h"
 #include "freertos/event_groups.h"
 #include "freertos/idf_additions.h"
-#include "dl_recognition_types.hpp"
+#include "dl_recognition_define.hpp"
 #include "dl_tensor_base.hpp"
 #include "esp_check.h"
 #include "esp_system.h"
@@ -26,7 +26,7 @@ public:
     DataBase(const char *db_path, int feat_len);
     virtual ~DataBase();
     esp_err_t clear_all_feats();
-    esp_err_t enroll_feat(dl::TensorBase *feat, const char *name = "", uint16_t *out_id = nullptr);
+    esp_err_t enroll_feat(dl::TensorBase *feat, const char *name, uint16_t *new_id);
     esp_err_t delete_feat(uint16_t id);
     esp_err_t delete_last_feat();
     std::vector<result_t> query_feat(dl::TensorBase *feat, float thr, int top_k);
