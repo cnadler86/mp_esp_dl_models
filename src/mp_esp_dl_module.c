@@ -13,6 +13,9 @@ static const mp_rom_map_elem_t module_globals_table[] = {
     #if MP_DL_IMAGENET_CLS_ENABLED
     { MP_ROM_QSTR(MP_QSTR_ImageNet), MP_ROM_PTR(&mp_image_net_type) },
     #endif
+    #if MP_DL_COCO_DETECTOR_ENABLED
+    { MP_ROM_QSTR(MP_QSTR_CocoDetector), MP_ROM_PTR(&mp_coco_detector_type) },
+    #endif
 };
 static MP_DEFINE_CONST_DICT(module_globals, module_globals_table);
 

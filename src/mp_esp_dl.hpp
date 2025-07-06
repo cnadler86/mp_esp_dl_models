@@ -13,6 +13,7 @@ extern const mp_obj_type_t mp_face_detector_type;
 extern const mp_obj_type_t mp_image_net_type;
 extern const mp_obj_type_t mp_human_detector_type;
 extern const mp_obj_type_t mp_face_recognizer_type;
+extern const mp_obj_type_t mp_coco_detector_type;
 
 #define MP_DEFINE_CONST_FUN_OBJ_0_CXX(obj_name, fun_name) \
     const mp_obj_fun_builtin_fixed_t obj_name = {.base = &mp_type_fun_builtin_0, .fun = {._0 = fun_name }}
@@ -79,7 +80,7 @@ namespace mp_esp_dl {
 
         size_t expected_size = dl::image::get_img_byte_size(self->img);
         if (bufinfo.len != expected_size) {
-            mp_raise_ValueError("Frame buffer size does not match the image size with the selected pixel format.");
+            mp_raise_ValueError(MP_ERROR_TEXT("Frame buffer size does not match the image size with the selected pixel format."));
         }
 
         self->img.data = (uint8_t *)bufinfo.buf;

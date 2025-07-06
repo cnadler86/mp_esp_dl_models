@@ -13,5 +13,7 @@ dependencies:
     override_path: ../../esp-dl/models/pedestrian_detect
   espressif/imagenet_cls:
     override_path: ../../esp-dl/models/imagenet_cls
+  espressif/coco_detect:
+    override_path: ../../esp-dl/models/coco_detect
   idf:
     version: ">=5.3.0"
