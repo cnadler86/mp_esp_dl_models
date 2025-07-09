@@ -53,6 +53,15 @@ if (MP_DL_COCO_DETECTOR_ENABLED)
     )
 endif()
 
+if (MP_DL_CAT_DETECTOR_ENABLED)
+    message(STATUS "Adding cat_detect model binding")
+    target_compile_definitions(usermod_mp_esp_dl INTERFACE MP_DL_CAT_DETECTOR_ENABLED=1)
+    add_dependencies(usermod_mp_esp_dl cat_detect)
+    target_sources(usermod_mp_esp_dl INTERFACE 
+        ${CMAKE_CURRENT_LIST_DIR}/esp_cat_detector.cpp
+    )
+endif()
+
 # Check if Camera is set or if Camera directory exists two levels up
 if(DEFINED MP_CAMERA_DIR AND EXISTS "${MP_CAMERA_DIR}")
     message(STATUS "Using user-defined MP_CAMERA_DIR: ${MP_CAMERA_DIR}")
