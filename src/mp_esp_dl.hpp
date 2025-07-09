@@ -52,20 +52,18 @@ namespace mp_esp_dl {
         std::shared_ptr<TModel> model;
     };
 
-    template <typename TDetector, typename TModel>
-    TDetector* make_new(const mp_obj_type_t* type, int width, int height, dl::image::pix_type_t pix_type = dl::image::DL_IMAGE_PIX_TYPE_RGB888) {
+    template <typename TDetector, typename TModel, typename... TArgs>
+    TDetector* make_new(const mp_obj_type_t* type, int width, int height, 
+                        dl::image::pix_type_t pix_type, TArgs&&... args) {
         TDetector* self = mp_obj_malloc_with_finaliser(TDetector, type);
-        self->model = std::make_shared<TModel>();
-    
+        self->model = std::make_shared<TModel>(std::forward<TArgs>(args)...);
         if (!self->model) {
             mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("Failed to create model instance."));
         }
-
         self->img.width = width;
         self->img.height = height;
         self->img.pix_type = pix_type;
         self->img.data = nullptr;
-    
         return self;
     }
 
@@ -99,7 +97,7 @@ namespace mp_esp_dl {
                 case MP_QSTR_height:
                     dest[0] = mp_obj_new_int(self->img.height);
                     break;
-                case MP_QSTR_pix_type:
+                case MP_QSTR_pixel_format:
                     dest[0] = mp_obj_new_int(self->img.pix_type);
                     break;
                 default:
@@ -113,7 +111,7 @@ namespace mp_esp_dl {
                 case MP_QSTR_height:
                     self->img.height = mp_obj_get_int(dest[1]);
                     break;
-                case MP_QSTR_pix_type:
+                case MP_QSTR_pixel_format:
                     self->img.pix_type = static_cast<dl::image::pix_type_t>(mp_obj_get_int(dest[1]));
                     break;
                 default:

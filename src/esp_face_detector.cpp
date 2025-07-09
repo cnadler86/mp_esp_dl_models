@@ -11,11 +11,12 @@ struct MP_FaceDetector : public MP_DetectorBase<HumanFaceDetect> {
 
 // Constructor
 static mp_obj_t face_detector_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args) {
-    enum { ARG_img_width, ARG_img_height, ARG_return_features };
+    enum { ARG_img_width, ARG_img_height, ARG_pixel_format, ARG_return_features };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_width, MP_ARG_INT, {.u_int = 320} },
         { MP_QSTR_height, MP_ARG_INT, {.u_int = 240} },
-        { MP_QSTR_features, MP_ARG_BOOL, {.u_bool = true} },
+        { MP_QSTR_pixel_format, MP_ARG_INT, {.u_int = dl::image::DL_IMAGE_PIX_TYPE_RGB888} },
+        { MP_QSTR_features, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = true} },
     };
 
     mp_arg_val_t parsed_args[MP_ARRAY_SIZE(allowed_args)];
@@ -24,7 +25,8 @@ static mp_obj_t face_detector_make_new(const mp_obj_type_t *type, size_t n_args,
     MP_FaceDetector *self = mp_esp_dl::make_new<MP_FaceDetector, HumanFaceDetect>(
         &mp_face_detector_type, 
         parsed_args[ARG_img_width].u_int, 
-        parsed_args[ARG_img_height].u_int);
+        parsed_args[ARG_img_height].u_int,
+        static_cast<dl::image::pix_type_t>(parsed_args[ARG_pixel_format].u_int));
     self->return_features = parsed_args[ARG_return_features].u_bool;
 
     return MP_OBJ_FROM_PTR(self);

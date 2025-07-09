@@ -7,7 +7,7 @@ static const mp_rom_map_elem_t module_globals_table[] = {
     #if MP_DL_FACE_RECOGNITION_ENABLED
     { MP_ROM_QSTR(MP_QSTR_FaceRecognizer), MP_ROM_PTR(&mp_face_recognizer_type) },
     #endif
-    #if MP_DL_PEDESTRISN_DETECTOR_ENABLED
+    #if MP_DL_PEDESTRIAN_DETECTOR_ENABLED
     { MP_ROM_QSTR(MP_QSTR_HumanDetector), MP_ROM_PTR(&mp_human_detector_type) },
     #endif
     #if MP_DL_IMAGENET_CLS_ENABLED

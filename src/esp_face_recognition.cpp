@@ -18,10 +18,11 @@ struct MP_FaceRecognizer : public MP_DetectorBase<HumanFaceDetect> {
 
 // Constructor
 static mp_obj_t face_recognizer_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args) {
-    enum { ARG_img_width, ARG_img_height, ARG_features, ARG_db_path, ARG_model };
+    enum { ARG_img_width, ARG_img_height, ARG_pixel_format, ARG_features, ARG_db_path, ARG_model };
     static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_width, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 320} },
-        { MP_QSTR_height, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 240} },
+        { MP_QSTR_width, MP_ARG_INT, {.u_int = 320} },
+        { MP_QSTR_height, MP_ARG_INT, {.u_int = 240} },
+        { MP_QSTR_pixel_format, MP_ARG_INT, {.u_int = dl::image::DL_IMAGE_PIX_TYPE_RGB888} },
         { MP_QSTR_features, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = true} },
         { MP_QSTR_db_path, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_obj = mp_const_none} },
     #if CONFIG_HUMAN_FACE_FEAT_MFN_S8_V1 && CONFIG_HUMAN_FACE_FEAT_MBF_S8_V1
@@ -35,7 +36,8 @@ static mp_obj_t face_recognizer_make_new(const mp_obj_type_t *type, size_t n_arg
     MP_FaceRecognizer *self = mp_esp_dl::make_new<MP_FaceRecognizer, HumanFaceDetect>(
         &mp_face_recognizer_type, 
         parsed_args[ARG_img_width].u_int, 
-        parsed_args[ARG_img_height].u_int);
+        parsed_args[ARG_img_height].u_int,
+        static_cast<dl::image::pix_type_t>(parsed_args[ARG_pixel_format].u_int));
 
     strncpy(self->db_path, "/face.db", sizeof(self->db_path));
     if (parsed_args[ARG_db_path].u_obj != mp_const_none) {
@@ -62,7 +64,7 @@ static mp_obj_t face_recognizer_make_new(const mp_obj_type_t *type, size_t n_arg
     self->FaceRecognizer = std::make_shared<HumanFaceRecognizer>(self->FaceFeat.get(), self->db_path);
 
     if ((!self->FaceFeat) || (!self->FaceRecognizer)) {
-        mp_raise_msg(&mp_type_RuntimeError, "Failed to create model instances");
+        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("Failed to create model instances"));
     }
 
     self->return_features = parsed_args[ARG_features].u_bool;
@@ -104,10 +106,10 @@ static mp_obj_t face_recognizer_enroll(size_t n_args, const mp_obj_t *pos_args, 
     auto &detect_results = self->model->run(self->img);
 
     if (detect_results.size() == 0) {
-        mp_raise_ValueError("No face detected.");
+        mp_raise_ValueError(MP_ERROR_TEXT("No face detected."));
     }
     if (detect_results.size() > 1) {
-        mp_raise_ValueError("Only one face can be enrolled at a time.");
+        mp_raise_ValueError(MP_ERROR_TEXT("Only one face can be enrolled at a time."));
     }
     
     // Only validate if explicitly requested
@@ -126,7 +128,7 @@ static mp_obj_t face_recognizer_enroll(size_t n_args, const mp_obj_t *pos_args, 
 
     uint16_t new_id;
     if (self->FaceRecognizer->enroll(self->img, detect_results, name, &new_id) != ESP_OK) {
-        mp_raise_ValueError("Failed to enroll face.");
+        mp_raise_ValueError(MP_ERROR_TEXT("Failed to enroll face."));
     }
 
     return mp_obj_new_int(new_id);
@@ -138,7 +140,7 @@ static mp_obj_t face_recognizer_delete_feature(mp_obj_t self_in, mp_obj_t id) {
     MP_FaceRecognizer *self = static_cast<MP_FaceRecognizer *>(MP_OBJ_TO_PTR(self_in));
     int id_num = mp_obj_get_int(id);
     if (self->FaceRecognizer->delete_feat(id_num) != ESP_OK) {
-        mp_raise_ValueError("Failed to delete feature.");
+        mp_raise_ValueError(MP_ERROR_TEXT("Failed to delete feature."));
     }
     return mp_const_none;
 }

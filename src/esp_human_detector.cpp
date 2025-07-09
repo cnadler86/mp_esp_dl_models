@@ -2,7 +2,7 @@
 #include "freertos/idf_additions.h"
 #include "pedestrian_detect.hpp"
 
-#if MP_DL_PEDESTRISN_DETECTOR_ENABLED
+#if MP_DL_PEDESTRIAN_DETECTOR_ENABLED
 
 namespace mp_esp_dl::HumanDetector {
 
@@ -12,10 +12,11 @@ struct MP_HumanDetector : public MP_DetectorBase<PedestrianDetect> {
 
 // Constructor
 static mp_obj_t human_detector_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args) {
-    enum { ARG_img_width, ARG_img_height };
+    enum { ARG_img_width, ARG_img_height, ARG_pixel_format };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_width, MP_ARG_INT, {.u_int = 320} },
         { MP_QSTR_height, MP_ARG_INT, {.u_int = 240} },
+        { MP_QSTR_pixel_format, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = dl::image::DL_IMAGE_PIX_TYPE_RGB888} },
     };
 
     mp_arg_val_t parsed_args[MP_ARRAY_SIZE(allowed_args)];
@@ -24,7 +25,8 @@ static mp_obj_t human_detector_make_new(const mp_obj_type_t *type, size_t n_args
     MP_HumanDetector *self = mp_esp_dl::make_new<MP_HumanDetector, PedestrianDetect>(
         &mp_human_detector_type, 
         parsed_args[ARG_img_width].u_int, 
-        parsed_args[ARG_img_height].u_int);
+        parsed_args[ARG_img_height].u_int,
+        static_cast<dl::image::pix_type_t>(parsed_args[ARG_pixel_format].u_int));
 
     return MP_OBJ_FROM_PTR(self);
 }
@@ -94,4 +96,4 @@ MP_DEFINE_CONST_OBJ_TYPE(
     locals_dict, &mp_esp_dl::HumanDetector::human_detector_locals_dict
 );
 
-#endif // MP_DL_PEDESTRISN_DETECTOR_ENABLED
+#endif // MP_DL_PEDESTRIAN_DETECTOR_ENABLED

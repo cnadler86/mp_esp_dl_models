@@ -88,6 +88,9 @@ async def handle_client(reader, writer):
                     if Model.__class__.__name__ == "FaceRecognizer":
                         if box['person'] is not None:   
                             Dict['label'] = f"{box['person']['name']} ({box['person']['similarity']*100:.0f}%), Score: {box['score']*100:.0f}%"
+                    if Model.__class__.__name__ == "CocoDetector":
+                        if box['category'] is not None:   
+                            Dict['label'] = f"Cat: {box['category']}, Score: {box['score']*100:.0f}%"
                     bounding_boxes.append(Dict)
             response = 'HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n' + json.dumps(bounding_boxes)
             writer.write(response.encode())
