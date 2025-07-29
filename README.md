@@ -32,9 +32,9 @@ git clone https://github.com/cnadler86/mp_jpeg.git
 ```
 
 2. Build the firmware:
-Make sure you have the complete ESP32 build environment for MicroPython available.
+Make sure you have the complete ESP32 build environment for MicroPython available. Then, you can build the firmware with the following commands:
 ```sh
-cd boards/
+cd mp_esp_dl_models/boards/
 idf.py -D MICROPY_DIR=<micropython-dir> -D MICROPY_BOARD=<BOARD_NAME> -D MICROPY_BOARD_VARIANT=<BOARD_VARIANT> -B build-<your-build-name> build
 cd build-<your-build-name>
 python ~/micropython/ports/esp32/makeimg.py sdkconfig bootloader/bootloader.bin partition_table/partition-table.bin micropython.bin firmware.bin micropython.uf2
@@ -44,7 +44,7 @@ python ~/micropython/ports/esp32/makeimg.py sdkconfig bootloader/bootloader.bin 
 
 ### Common Requirements
 
-All models require input images in RGB888 format. You can use [mp_jpeg](https://github.com/cnadler86/mp_jpeg/) to decode camera images to the correct format.
+All models require input images in appropriate format (RGB888, RGB565 big endian). You can use [mp_jpeg](https://github.com/cnadler86/mp_jpeg/) to decode camera images to the correct format.
 
 ### FaceDetector
 
@@ -184,6 +184,33 @@ ImageNet(width=320, height=240)
   List alternating between class names and confidence scores:
   `[class1, score1, class2, score2, ...]`
 
+### COCO detect
+
+The COCO detect module detects objects in images using the COCO dataset.
+
+#### Constructor
+```python
+COCODetector(width=320, height=240)
+```
+
+**Parameters:**
+- `width` (int, optional): Input image width. Default: 320
+- `height` (int, optional): Input image height. Default: 240
+
+#### Methods
+- **run(framebuffer)**
+  
+  Detects objects in the provided image.
+
+  **Parameters:**
+  - `framebuffer`: RGB888 image data
+
+  **Returns:**
+  List of dictionaries with detection results, each containing:
+  - `score`: Detection confidence
+  - `box`: Bounding box coordinates [x1, y1, x2, y2]
+  - `category`: Detected object class id
+
 ## Usage Examples
 
 ### Face Detection Example
@@ -259,7 +286,7 @@ The following table shows the frames per second (fps) for different image sizes 
 
 ## Notes & Best Practices
 
-1. **Image Format**: Always ensure input images are in RGB888 format. Use mp_jpeg for JPEG decoding from camera.
+1. **Image Format**: Always ensure input images are in the right format. Use mp_jpeg for JPEG decoding from camera.
 
 2. **Memory Management**: 
    - Close/delete detector objects when no longer needed
