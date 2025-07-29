@@ -26,7 +26,7 @@ You can find precompiled images in two ways:
 
 1. Clone the required repositories:
 ```sh
-git clone https://github.com/cnadler86/mp_esp_dl_models.git
+git clone --recursive https://github.com/cnadler86/mp_esp_dl_models.git
 git clone https://github.com/cnadler86/micropython-camera-API.git
 git clone https://github.com/cnadler86/mp_jpeg.git
 ```
