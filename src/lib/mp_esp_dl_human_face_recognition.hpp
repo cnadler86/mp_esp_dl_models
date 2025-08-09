@@ -24,7 +24,7 @@ public:
         MFN_S8_V1,
         MBF_S8_V1,
     } model_type_t;
-    HumanFaceFeat(model_type_t model_type = static_cast<model_type_t>(CONFIG_HUMAN_FACE_FEAT_MODEL_TYPE));
+    HumanFaceFeat(model_type_t model_type = static_cast<model_type_t>(CONFIG_DEFAULT_HUMAN_FACE_FEAT_MODEL));
 };
 
 class HumanFaceRecognizer : public mp_esp_dl::recognition::DataBase {

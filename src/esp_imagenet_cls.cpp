@@ -12,10 +12,11 @@ struct MP_ImageNetCls : public MP_DetectorBase<ImageNetCls> {
 
 // Constructor
 static mp_obj_t image_net_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args) {
-    enum { ARG_img_width, ARG_img_height };
+    enum { ARG_img_width, ARG_img_height, ARG_pixel_format };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_width, MP_ARG_INT, {.u_int = 320} },
         { MP_QSTR_height, MP_ARG_INT, {.u_int = 240} },
+        { MP_QSTR_pixel_format, MP_ARG_INT, {.u_int = dl::image::DL_IMAGE_PIX_TYPE_RGB888} },
     };
 
     mp_arg_val_t parsed_args[MP_ARRAY_SIZE(allowed_args)];
@@ -24,7 +25,8 @@ static mp_obj_t image_net_make_new(const mp_obj_type_t *type, size_t n_args, siz
     MP_ImageNetCls *self = mp_esp_dl::make_new<MP_ImageNetCls, ImageNetCls>(
         &mp_image_net_type, 
         parsed_args[ARG_img_width].u_int, 
-        parsed_args[ARG_img_height].u_int);
+        parsed_args[ARG_img_height].u_int,
+        static_cast<dl::image::pix_type_t>(parsed_args[ARG_pixel_format].u_int));
     return MP_OBJ_FROM_PTR(self);
 }
 

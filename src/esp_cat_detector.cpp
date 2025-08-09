@@ -1,17 +1,15 @@
 #include "mp_esp_dl.hpp"
 #include "freertos/idf_additions.h"
-#include "pedestrian_detect.hpp"
+#include "cat_detect.hpp" 
 
-
-
-namespace mp_esp_dl::HumanDetector {
+namespace mp_esp_dl::CatDetector {
 
 // Object
-struct MP_HumanDetector : public MP_DetectorBase<PedestrianDetect> {
+struct MP_CatDetector : public MP_DetectorBase<CatDetect> {
 };
 
 // Constructor
-static mp_obj_t human_detector_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args) {
+static mp_obj_t cat_detector_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args) {
     enum { ARG_img_width, ARG_img_height, ARG_pixel_format };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_width, MP_ARG_INT, {.u_int = 320} },
@@ -22,8 +20,8 @@ static mp_obj_t human_detector_make_new(const mp_obj_type_t *type, size_t n_args
     mp_arg_val_t parsed_args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all_kw_array(n_args, n_kw, args, MP_ARRAY_SIZE(allowed_args), allowed_args, parsed_args);
 
-    MP_HumanDetector *self = mp_esp_dl::make_new<MP_HumanDetector, PedestrianDetect>(
-        &mp_human_detector_type, 
+    MP_CatDetector *self = mp_esp_dl::make_new<MP_CatDetector, CatDetect>(
+        &mp_cat_detector_type, 
         parsed_args[ARG_img_width].u_int, 
         parsed_args[ARG_img_height].u_int,
         static_cast<dl::image::pix_type_t>(parsed_args[ARG_pixel_format].u_int));
@@ -32,21 +30,21 @@ static mp_obj_t human_detector_make_new(const mp_obj_type_t *type, size_t n_args
 }
 
 // Destructor
-static mp_obj_t human_detector_del(mp_obj_t self_in) {
-    MP_HumanDetector *self = static_cast<MP_HumanDetector *>(MP_OBJ_TO_PTR(self_in));
+static mp_obj_t cat_detector_del(mp_obj_t self_in) {
+    MP_CatDetector *self = static_cast<MP_CatDetector *>(MP_OBJ_TO_PTR(self_in));
     self->model = nullptr;
     return mp_const_none;
 }
-static MP_DEFINE_CONST_FUN_OBJ_1_CXX(human_detector_del_obj, human_detector_del);
+static MP_DEFINE_CONST_FUN_OBJ_1_CXX(cat_detector_del_obj, cat_detector_del);
 
 // Get and set methods
-static void human_detector_attr(mp_obj_t self_in, qstr attr, mp_obj_t *dest) {
-    mp_esp_dl::espdl_obj_property<MP_HumanDetector>(self_in, attr, dest);
+static void cat_detector_attr(mp_obj_t self_in, qstr attr, mp_obj_t *dest) {
+    mp_esp_dl::espdl_obj_property<MP_CatDetector>(self_in, attr, dest);
 }
 
 // Detect method
-static mp_obj_t human_detector_detect(mp_obj_t self_in, mp_obj_t framebuffer_obj) {
-    MP_HumanDetector *self = mp_esp_dl::get_and_validate_framebuffer<MP_HumanDetector>(self_in, framebuffer_obj);
+static mp_obj_t cat_detector_detect(mp_obj_t self_in, mp_obj_t framebuffer_obj) {
+    MP_CatDetector *self = mp_esp_dl::get_and_validate_framebuffer<MP_CatDetector>(self_in, framebuffer_obj);
 
     auto &detect_results = self->model->run(self->img);
 
@@ -69,31 +67,29 @@ static mp_obj_t human_detector_detect(mp_obj_t self_in, mp_obj_t framebuffer_obj
     }
     return list;
 }
-static MP_DEFINE_CONST_FUN_OBJ_2_CXX(human_detector_detect_obj, human_detector_detect);
+static MP_DEFINE_CONST_FUN_OBJ_2_CXX(cat_detector_detect_obj, cat_detector_detect);
 
 // Local dict
-static const mp_rom_map_elem_t human_detector_locals_dict_table[] = {
-    { MP_ROM_QSTR(MP_QSTR_run), MP_ROM_PTR(&human_detector_detect_obj) },
-    { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&human_detector_del_obj) },
+static const mp_rom_map_elem_t cat_detector_locals_dict_table[] = {
+    { MP_ROM_QSTR(MP_QSTR_run), MP_ROM_PTR(&cat_detector_detect_obj) },
+    { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&cat_detector_del_obj) },
 };
-static MP_DEFINE_CONST_DICT(human_detector_locals_dict, human_detector_locals_dict_table);
+static MP_DEFINE_CONST_DICT(cat_detector_locals_dict, cat_detector_locals_dict_table);
 
 // Print
 static void print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
-    mp_printf(print, "Human detector object");
+    mp_printf(print, "Cat detector object");
 }
 
 } //namespace
 
 // Type
 MP_DEFINE_CONST_OBJ_TYPE(
-    mp_human_detector_type,
-    MP_QSTR_HumanDetector,
+    mp_cat_detector_type,
+    MP_QSTR_CatDetector,
     MP_TYPE_FLAG_NONE,
-    make_new, (const void *)mp_esp_dl::HumanDetector::human_detector_make_new,
-    print, (const void *)mp_esp_dl::HumanDetector::print,
-    attr, (const void *)mp_esp_dl::HumanDetector::human_detector_attr,
-    locals_dict, &mp_esp_dl::HumanDetector::human_detector_locals_dict
+    make_new, (const void *)mp_esp_dl::CatDetector::cat_detector_make_new,
+    print, (const void *)mp_esp_dl::CatDetector::print,
+    attr, (const void *)mp_esp_dl::CatDetector::cat_detector_attr,
+    locals_dict, &mp_esp_dl::CatDetector::cat_detector_locals_dict
 );
-
-

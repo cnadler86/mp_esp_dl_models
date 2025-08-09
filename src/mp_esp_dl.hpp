@@ -13,6 +13,8 @@ extern const mp_obj_type_t mp_face_detector_type;
 extern const mp_obj_type_t mp_image_net_type;
 extern const mp_obj_type_t mp_human_detector_type;
 extern const mp_obj_type_t mp_face_recognizer_type;
+extern const mp_obj_type_t mp_coco_detector_type;
+extern const mp_obj_type_t mp_cat_detector_type;
 
 #define MP_DEFINE_CONST_FUN_OBJ_0_CXX(obj_name, fun_name) \
     const mp_obj_fun_builtin_fixed_t obj_name = {.base = &mp_type_fun_builtin_0, .fun = {._0 = fun_name }}
@@ -51,20 +53,18 @@ namespace mp_esp_dl {
         std::shared_ptr<TModel> model;
     };
 
-    template <typename TDetector, typename TModel>
-    TDetector* make_new(const mp_obj_type_t* type, int width, int height, dl::image::pix_type_t pix_type = dl::image::DL_IMAGE_PIX_TYPE_RGB888) {
+    template <typename TDetector, typename TModel, typename... TArgs>
+    TDetector* make_new(const mp_obj_type_t* type, int width, int height, 
+                        dl::image::pix_type_t pix_type, TArgs&&... args) {
         TDetector* self = mp_obj_malloc_with_finaliser(TDetector, type);
-        self->model = std::make_shared<TModel>();
-    
+        self->model = std::make_shared<TModel>(std::forward<TArgs>(args)...);
         if (!self->model) {
             mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("Failed to create model instance."));
         }
-
         self->img.width = width;
         self->img.height = height;
         self->img.pix_type = pix_type;
         self->img.data = nullptr;
-    
         return self;
     }
 
@@ -79,7 +79,7 @@ namespace mp_esp_dl {
 
         size_t expected_size = dl::image::get_img_byte_size(self->img);
         if (bufinfo.len != expected_size) {
-            mp_raise_ValueError("Frame buffer size does not match the image size with the selected pixel format.");
+            mp_raise_ValueError(MP_ERROR_TEXT("Frame buffer size does not match the image size with the selected pixel format."));
         }
 
         self->img.data = (uint8_t *)bufinfo.buf;
@@ -98,7 +98,7 @@ namespace mp_esp_dl {
                 case MP_QSTR_height:
                     dest[0] = mp_obj_new_int(self->img.height);
                     break;
-                case MP_QSTR_pix_type:
+                case MP_QSTR_pixel_format:
                     dest[0] = mp_obj_new_int(self->img.pix_type);
                     break;
                 default:
@@ -112,7 +112,7 @@ namespace mp_esp_dl {
                 case MP_QSTR_height:
                     self->img.height = mp_obj_get_int(dest[1]);
                     break;
-                case MP_QSTR_pix_type:
+                case MP_QSTR_pixel_format:
                     self->img.pix_type = static_cast<dl::image::pix_type_t>(mp_obj_get_int(dest[1]));
                     break;
                 default:
