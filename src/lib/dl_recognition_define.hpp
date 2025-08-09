@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <cstring>
+#include <string.h>
 
 namespace mp_esp_dl {
 namespace recognition {
@@ -23,7 +24,7 @@ struct database_feat {
     }
     
     database_feat(uint16_t _id, float *_feat, const char *_name = "") : id(_id), feat(_feat) {
-        strncpy(name, _name, MAX_NAME_LENGTH - 1);
+        strlcpy(name, _name, MAX_NAME_LENGTH - 1);
         name[MAX_NAME_LENGTH - 1] = '\0';
     }
 };
@@ -38,7 +39,7 @@ struct result_t {
     }
     
     result_t(uint16_t _id, float _sim, const char *_name = "") : id(_id), similarity(_sim) {
-        strncpy(name, _name, MAX_NAME_LENGTH - 1);
+        strlcpy(name, _name, MAX_NAME_LENGTH - 1);
         name[MAX_NAME_LENGTH - 1] = '\0';
     }
 };
