@@ -32,7 +32,7 @@ git clone https://github.com/cnadler86/mp_jpeg.git
 ```
 
 2. Build the firmware:
-Make sure you have the complete ESP32 build environment for MicroPython available. Then, you can build the firmware with the following commands:
+Make sure you have the complete ESP32 build environment for MicroPython (>=1.25.0) available (esp-idf >=5.3 is required. Micropython might not supoprt the newest idf). Then, you can build the firmware with the following commands:
 ```sh
 cd mp_esp_dl_models/boards/
 idf.py -D MICROPY_DIR=<micropython-dir> -D MICROPY_BOARD=<BOARD_NAME> -D MICROPY_BOARD_VARIANT=<BOARD_VARIANT> -B build-<your-build-name> build
