@@ -84,6 +84,11 @@ else()
     endif()
 endif()
 
+# Deactivate ROM text compression for module
+target_compile_definitions(usermod_mp_esp_dl INTERFACE 
+    MICROPY_ROM_TEXT_COMPRESSION=0
+)
+
 target_link_libraries(usermod INTERFACE usermod_mp_esp_dl)
 
 micropy_gather_target_properties(usermod_mp_esp_dl)
