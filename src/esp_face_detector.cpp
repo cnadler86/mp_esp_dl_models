@@ -38,7 +38,7 @@ static mp_obj_t face_detector_del(mp_obj_t self_in) {
     self->model = nullptr;
     return mp_const_none;
 }
-static MP_DEFINE_CONST_FUN_OBJ_1_CXX(face_detector_del_obj, face_detector_del);
+static MP_DEFINE_CONST_FUN_OBJ_1(face_detector_del_obj, face_detector_del);
 
 // Get and set methods
 static void face_detector_attr(mp_obj_t self_in, qstr attr, mp_obj_t *dest){
@@ -80,7 +80,7 @@ static mp_obj_t face_detector_detect(mp_obj_t self_in, mp_obj_t framebuffer_obj)
     }
     return list;
 }
-static MP_DEFINE_CONST_FUN_OBJ_2_CXX(face_detector_detect_obj, face_detector_detect);
+static MP_DEFINE_CONST_FUN_OBJ_2(face_detector_detect_obj, face_detector_detect);
 
 // Local dict
 static const mp_rom_map_elem_t face_detector_locals_dict_table[] = {

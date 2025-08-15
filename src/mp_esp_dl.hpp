@@ -16,28 +16,6 @@ extern const mp_obj_type_t mp_face_recognizer_type;
 extern const mp_obj_type_t mp_coco_detector_type;
 extern const mp_obj_type_t mp_cat_detector_type;
 
-#define MP_DEFINE_CONST_FUN_OBJ_0_CXX(obj_name, fun_name) \
-    const mp_obj_fun_builtin_fixed_t obj_name = {.base = &mp_type_fun_builtin_0, .fun = {._0 = fun_name }}
-
-#define MP_DEFINE_CONST_FUN_OBJ_1_CXX(obj_name, fun_name) \
-    const mp_obj_fun_builtin_fixed_t obj_name = { .base = &mp_type_fun_builtin_1, .fun = {._1 = fun_name }}
-
-#define MP_DEFINE_CONST_FUN_OBJ_2_CXX(obj_name, fun_name) \
-    const mp_obj_fun_builtin_fixed_t obj_name = { .base = &mp_type_fun_builtin_2, .fun = {._2 = fun_name }}
-
-#define MP_DEFINE_CONST_FUN_OBJ_3_CXX(obj_name, fun_name) \
-    const mp_obj_fun_builtin_fixed_t obj_name = { .base = &mp_type_fun_builtin_3, .fun = {._3 = fun_name }}
-
-#define MP_DEFINE_CONST_FUN_OBJ_VAR_CXX(obj_name, n_args_min, fun_name) \
-    const mp_obj_fun_builtin_var_t obj_name = \
-    {.base = {.type = &mp_type_fun_builtin_var}, .sig = MP_OBJ_FUN_MAKE_SIG(n_args_min, MP_OBJ_FUN_ARGS_MAX, false), .fun = {.var = fun_name}}
-#define MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN_CXX(obj_name, n_args_min, n_args_max, fun_name) \
-    const mp_obj_fun_builtin_var_t obj_name = \
-    {.base = {.type = &mp_type_fun_builtin_var}, .sig = MP_OBJ_FUN_MAKE_SIG(n_args_min, n_args_max, false), .fun = {.var = fun_name}}
-#define MP_DEFINE_CONST_FUN_OBJ_KW_CXX(obj_name, n_args_min, fun_name) \
-    const mp_obj_fun_builtin_var_t obj_name = \
-    {.base = {.type = &mp_type_fun_builtin_var}, .sig = MP_OBJ_FUN_MAKE_SIG(n_args_min, MP_OBJ_FUN_ARGS_MAX, true), .fun = {.kw = fun_name}}
-
 #ifdef __cplusplus
 }
 #endif

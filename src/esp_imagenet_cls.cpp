@@ -36,7 +36,7 @@ static mp_obj_t image_net_del(mp_obj_t self_in) {
     self->model = nullptr;
     return mp_const_none;
 }
-static MP_DEFINE_CONST_FUN_OBJ_1_CXX(image_net_del_obj, image_net_del);
+static MP_DEFINE_CONST_FUN_OBJ_1(image_net_del_obj, image_net_del);
 
 // Get and set methods
 static void image_net_attr(mp_obj_t self_in, qstr attr, mp_obj_t *dest) {
@@ -60,7 +60,7 @@ static mp_obj_t image_net_classify(mp_obj_t self_in, mp_obj_t framebuffer_obj) {
     }
     return list;
 }
-static MP_DEFINE_CONST_FUN_OBJ_2_CXX(image_net_classify_obj, image_net_classify);
+static MP_DEFINE_CONST_FUN_OBJ_2(image_net_classify_obj, image_net_classify);
 
 // Local dict
 static const mp_rom_map_elem_t image_net_locals_dict_table[] = {
