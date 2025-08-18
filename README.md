@@ -1,6 +1,6 @@
 # ESP DL MicroPython Binding
 
-This is a MicroPython binding for ESP-DL (Deep Learning) models that enables face detection, face recognition, human detection, and image classification on ESP32 devices.
+This is a MicroPython binding for ESP-DL (Deep Learning) models that enables face detection, face recognition, human detection, cat detection, and image classification on ESP32 devices.
 
 ## Donate
 
@@ -12,9 +12,17 @@ I spent a lot of time and effort to make this. If you find this project useful, 
 - `FaceDetector`: Detects faces in images and provides bounding boxes and facial features
 - `FaceRecognizer`: Recognizes enrolled faces and manages a face database
 - `HumanDetector`: Detects people in images and provides bounding boxes
+- `CatDetector`: Detects cats in images and provides bounding boxes
 - `ImageNet`: Classifies images into predefined categories
+- `CocoDetector`: Detects objects in images using COCO dataset categories
 
 ## Installation & Building
+
+### Requirements
+
+- ESP-IDF:
+  - Version 5.4.2 with MicroPython >=1.26.0
+- Make sure you have the complete ESP32 build environment set up
 
 ### Precompiled Images
 
@@ -32,7 +40,24 @@ git clone https://github.com/cnadler86/mp_jpeg.git
 ```
 
 2. Build the firmware:
-Make sure you have the complete ESP32 build environment for MicroPython (>=1.25.0) available (esp-idf >=5.3 is required. Micropython might not supoprt the newest idf). Then, you can build the firmware with the following commands:
+There are two ways to enable the different models:
+
+a) Using mpconfigvariant files (recommended):
+The models can be enabled in the board's mpconfigvariant files (e.g., mpconfigvariant_FLASH_16M.cmake). The following flags are available:
+- MP_DL_FACE_DETECTOR_ENABLED
+- MP_DL_FACE_RECOGNITION_ENABLED
+- MP_DL_PEDESTRIAN_DETECTOR_ENABLED
+- MP_DL_IMAGENET_CLS_ENABLED
+- MP_DL_COCO_DETECTOR_ENABLED
+- MP_DL_CAT_DETECTOR_ENABLED
+
+b) Using command line flags:
+You can enable models directly through the idf.py command using -D flags:
+```sh
+idf.py -D MP_DL_FACE_RECOGNITION_ENABLED=1 -D MP_DL_CAT_DETECTOR_ENABLED=1 [other flags...]
+```
+
+Basic build command:
 ```sh
 cd mp_esp_dl_models/boards/
 idf.py -D MICROPY_DIR=<micropython-dir> -D MICROPY_BOARD=<BOARD_NAME> -D MICROPY_BOARD_VARIANT=<BOARD_VARIANT> -B build-<your-build-name> build
@@ -137,13 +162,13 @@ FaceRecognizer(width=320, height=240, pixel_format=DL_IMAGE_PIX_TYPE_RGB888, fea
   
   Prints the contents of the face database.
 
-### HumanDetector
+### HumanDetector and Cat Detector
 
-The HumanDetector module detects people in images.
+The HumanDetector module detects people in images. The CatDetector does it for cats. Both modules provide bounding boxes for detected objects.
 
 #### Constructor
 ```python
-HumanDetector(width=320, height=240, pixel_format=DL_IMAGE_PIX_TYPE_RGB888)
+HumanDetector(width=320, height=240, pixel_format=DL_IMAGE_PIX_TYPE_RGB888) #For cats use CatDetector
 ```
 
 **Parameters:**

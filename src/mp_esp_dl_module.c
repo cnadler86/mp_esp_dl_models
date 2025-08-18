@@ -3,7 +3,9 @@
 
 static const mp_rom_map_elem_t module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_espdl) },
+    #if MP_DL_FACE_DETECTOR_ENABLED
     { MP_ROM_QSTR(MP_QSTR_FaceDetector), MP_ROM_PTR(&mp_face_detector_type) },
+    #endif
     #if MP_DL_FACE_RECOGNITION_ENABLED
     { MP_ROM_QSTR(MP_QSTR_FaceRecognizer), MP_ROM_PTR(&mp_face_recognizer_type) },
     #endif

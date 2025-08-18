@@ -2,16 +2,22 @@ include(${MICROPY_DIR}/py/py.cmake)
 
 add_library(usermod_mp_esp_dl INTERFACE)
 
-add_dependencies(usermod_mp_esp_dl human_face_detect)
-
 target_include_directories(usermod_mp_esp_dl INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}
 )
 
 target_sources(usermod_mp_esp_dl INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/mp_esp_dl_module.c
-    ${CMAKE_CURRENT_LIST_DIR}/esp_face_detector.cpp
 )
+
+if (MP_DL_FACE_DETECTOR_ENABLED)
+    message(STATUS "Adding face detector model binding")
+    target_compile_definitions(usermod_mp_esp_dl INTERFACE MP_DL_FACE_DETECTOR_ENABLED=1)
+    add_dependencies(usermod_mp_esp_dl human_face_detect)
+    target_sources(usermod_mp_esp_dl INTERFACE 
+        ${CMAKE_CURRENT_LIST_DIR}/esp_face_detector.cpp
+    )
+endif()
 
 if (MP_DL_IMAGENET_CLS_ENABLED)
     message(STATUS "Adding imagenet_cls model binding")
