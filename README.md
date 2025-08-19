@@ -79,13 +79,13 @@ The FaceDetector module detects faces in images and can optionally provide facia
 
 #### Constructor
 ```python
-FaceDetector(width=320, height=240, pixel_format=DL_IMAGE_PIX_TYPE_RGB888, features=True)
+FaceDetector(width=320, height=240, pixel_format=espdl.RGB888, features=True)
 ```
 
 **Parameters:**
 - `width` (int, optional): Input image width. Default: 320
 - `height` (int, optional): Input image height. Default: 240
-- `pixel_format` (int, optional): Input image pixel format. Default: DL_IMAGE_PIX_TYPE_RGB888
+- `pixel_format` (int, optional): Input image pixel format. Default: espdl.RGB888
 - `features` (bool, optional): Whether to return facial feature points. Default: True
 
 #### Methods
@@ -109,13 +109,13 @@ The FaceRecognizer module manages a database of faces and can recognize previous
 
 #### Constructor
 ```python
-FaceRecognizer(width=320, height=240, pixel_format=DL_IMAGE_PIX_TYPE_RGB888, features=True, db_path="face.db", model=None)
+FaceRecognizer(width=320, height=240, pixel_format=espdl.RGB888, features=True, db_path="face.db", model=None)
 ```
 
 **Parameters:**
 - `width` (int, optional): Input image width. Default: 320
 - `height` (int, optional): Input image height. Default: 240
-- `pixel_format` (int, optional): Input image pixel format. Default: DL_IMAGE_PIX_TYPE_RGB888
+- `pixel_format` (int, optional): Input image pixel format. Default: espdl.RGB888
 - `features` (bool, optional): Whether to return facial feature points. Default: True
 - `db_path` (str, optional): Path to the face database file. Default: "face.db"
 - `model` (str, optional): Feature extraction model to use ("MBF" or "MFN"). Default: None (uses default model)
@@ -168,13 +168,13 @@ The HumanDetector module detects people in images. The CatDetector does it for c
 
 #### Constructor
 ```python
-HumanDetector(width=320, height=240, pixel_format=DL_IMAGE_PIX_TYPE_RGB888) #For cats use CatDetector
+HumanDetector(width=320, height=240, pixel_format=espdl.RGB888) #For cats use CatDetector
 ```
 
 **Parameters:**
 - `width` (int, optional): Input image width. Default: 320
 - `height` (int, optional): Input image height. Default: 240
-- `pixel_format` (int, optional): Input image pixel format. Default: DL_IMAGE_PIX_TYPE_RGB888
+- `pixel_format` (int, optional): Input image pixel format. Default: espdl.RGB888
 
 #### Methods
 
@@ -196,13 +196,13 @@ The ImageNet module classifies images into predefined categories.
 
 #### Constructor
 ```python
-ImageNet(width=320, height=240, pixel_format=DL_IMAGE_PIX_TYPE_RGB888)
+ImageNet(width=320, height=240, pixel_format=espdl.RGB888)
 ```
 
 **Parameters:**
 - `width` (int, optional): Input image width. Default: 320
 - `height` (int, optional): Input image height. Default: 240
-- `pixel_format` (int, optional): Input image pixel format. Default: DL_IMAGE_PIX_TYPE_RGB888
+- `pixel_format` (int, optional): Input image pixel format. Default: espdl.RGB888
 
 #### Methods
 
@@ -223,13 +223,13 @@ The COCO detect module detects objects in images using the COCO dataset.
 
 #### Constructor
 ```python
-COCODetector(width=320, height=240, pixel_format=DL_IMAGE_PIX_TYPE_RGB888, model=CONFIG_DEFAULT_COCO_DETECT_MODEL)
+COCODetector(width=320, height=240, pixel_format=espdl.RGB888, model=CONFIG_DEFAULT_COCO_DETECT_MODEL)
 ```
 
 **Parameters:**
 - `width` (int, optional): Input image width. Default: 320
 - `height` (int, optional): Input image height. Default: 240
-- `pixel_format` (int, optional): Input image pixel format. Default: DL_IMAGE_PIX_TYPE_RGB888
+- `pixel_format` (int, optional): Input image pixel format. Default: espdl.RGB888
 - `model` (int, optional): COCO detection model to use. Default: CONFIG_DEFAULT_COCO_DETECT_MODEL
 
 #### Methods
