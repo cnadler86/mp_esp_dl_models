@@ -80,7 +80,7 @@ static mp_obj_t face_recognizer_del(mp_obj_t self_in) {
     self->FaceRecognizer = nullptr;
     return mp_const_none;
 }
-static MP_DEFINE_CONST_FUN_OBJ_1(face_recognizer_del_obj, face_recognizer_del);
+static MP_DEFINE_CONST_FUN_OBJ_1_CXX(face_recognizer_del_obj, face_recognizer_del);
 
 // Get and set methods
 static void face_recognizer_attr(mp_obj_t self_in, qstr attr, mp_obj_t *dest) {
@@ -133,7 +133,7 @@ static mp_obj_t face_recognizer_enroll(size_t n_args, const mp_obj_t *pos_args, 
 
     return mp_obj_new_int(new_id);
 }
-static MP_DEFINE_CONST_FUN_OBJ_KW(face_recognizer_enroll_obj, 2, face_recognizer_enroll);
+static MP_DEFINE_CONST_FUN_OBJ_KW_CXX(face_recognizer_enroll_obj, 2, face_recognizer_enroll);
 
 // Delete feature method
 static mp_obj_t face_recognizer_delete_feature(mp_obj_t self_in, mp_obj_t id) {
@@ -144,7 +144,7 @@ static mp_obj_t face_recognizer_delete_feature(mp_obj_t self_in, mp_obj_t id) {
     }
     return mp_const_none;
 }
-static MP_DEFINE_CONST_FUN_OBJ_2(face_recognizer_delete_feature_obj, face_recognizer_delete_feature);
+static MP_DEFINE_CONST_FUN_OBJ_2_CXX(face_recognizer_delete_feature_obj, face_recognizer_delete_feature);
 
 // Recognize method
 static mp_obj_t face_recognizer_recognize(mp_obj_t self_in, mp_obj_t framebuffer_obj) {
@@ -201,7 +201,7 @@ static mp_obj_t face_recognizer_recognize(mp_obj_t self_in, mp_obj_t framebuffer
     }
     return list;
 }
-static MP_DEFINE_CONST_FUN_OBJ_2(face_recognizer_recognize_obj, face_recognizer_recognize);
+static MP_DEFINE_CONST_FUN_OBJ_2_CXX(face_recognizer_recognize_obj, face_recognizer_recognize);
 
 // Print Database
 static mp_obj_t face_recognizer_print_database(mp_obj_t self_in) {
@@ -209,7 +209,7 @@ static mp_obj_t face_recognizer_print_database(mp_obj_t self_in) {
     self->FaceRecognizer->print();
     return mp_const_none;
 }
-static MP_DEFINE_CONST_FUN_OBJ_1(face_recognizer_print_database_obj, face_recognizer_print_database);
+static MP_DEFINE_CONST_FUN_OBJ_1_CXX(face_recognizer_print_database_obj, face_recognizer_print_database);
 
 // Local dict
 static const mp_rom_map_elem_t face_recognizer_locals_dict_table[] = {

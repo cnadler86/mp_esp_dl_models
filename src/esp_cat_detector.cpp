@@ -39,7 +39,7 @@ static mp_obj_t cat_detector_del(mp_obj_t self_in) {
     self->model = nullptr;
     return mp_const_none;
 }
-static MP_DEFINE_CONST_FUN_OBJ_1(cat_detector_del_obj, cat_detector_del);
+static MP_DEFINE_CONST_FUN_OBJ_1_CXX(cat_detector_del_obj, cat_detector_del);
 
 // Get and set methods
 static void cat_detector_attr(mp_obj_t self_in, qstr attr, mp_obj_t *dest){
@@ -71,7 +71,7 @@ static mp_obj_t cat_detector_detect(mp_obj_t self_in, mp_obj_t framebuffer_obj) 
     }
     return list;
 }
-static MP_DEFINE_CONST_FUN_OBJ_2(cat_detector_detect_obj, cat_detector_detect);
+static MP_DEFINE_CONST_FUN_OBJ_2_CXX(cat_detector_detect_obj, cat_detector_detect);
 
 // Local dict
 static const mp_rom_map_elem_t cat_detector_locals_dict_table[] = {
