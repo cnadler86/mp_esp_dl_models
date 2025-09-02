@@ -73,6 +73,11 @@ All models support various input pixel formats including RGB888 (default), RGB56
 
 The pixel format can be set through the constructor's `pixel_format` parameter. This value matches the ESP-DL image format definitions.
 
+### Pixel Formats
+- `espdl.RGB888` (default)
+- `espdl.RGB565`
+- `espdl.GRAYSCALE`
+
 ### FaceDetector
 
 The FaceDetector module detects faces in images and can optionally provide facial feature points.
@@ -95,7 +100,7 @@ FaceDetector(width=320, height=240, pixel_format=espdl.RGB888, features=True)
   Detects faces in the provided image.
 
   **Parameters:**
-  - `framebuffer`: RGB888 image data (required)
+  - `framebuffer`: image data (required)
 
   **Returns:**
   List of dictionaries with detection results, each containing:
@@ -127,7 +132,7 @@ FaceRecognizer(width=320, height=240, pixel_format=espdl.RGB888, features=True, 
   Detects and recognizes faces in the provided image.
 
   **Parameters:**
-  - `framebuffer`: RGB888 image data (required)
+  - `framebuffer`: image data (required)
 
   **Returns:**
   List of dictionaries with recognition results, each containing:
@@ -144,7 +149,7 @@ FaceRecognizer(width=320, height=240, pixel_format=espdl.RGB888, features=True, 
   Enrolls a new face in the database.
 
   **Parameters:**
-  - `framebuffer`: RGB888 image data
+  - `framebuffer`: image data
   - `validate` (bool, optional): Check if face is already enrolled. Default: False
   - `name` (str, optional): Name to associate with the face. Default: None
 
@@ -183,7 +188,7 @@ HumanDetector(width=320, height=240, pixel_format=espdl.RGB888) #For cats use Ca
   Detects people in the provided image.
 
   **Parameters:**
-  - `framebuffer`: RGB888 image data
+  - `framebuffer`: image data
 
   **Returns:**
   List of dictionaries with detection results, each containing:
@@ -211,7 +216,7 @@ ImageNet(width=320, height=240, pixel_format=espdl.RGB888)
   Classifies the provided image.
 
   **Parameters:**
-  - `framebuffer`: RGB888 image data
+  - `framebuffer`: image data
 
   **Returns:**
   List alternating between class names and confidence scores:
@@ -238,7 +243,7 @@ COCODetector(width=320, height=240, pixel_format=espdl.RGB888, model=CONFIG_DEFA
   Detects objects in the provided image.
 
   **Parameters:**
-  - `framebuffer`: RGB888 image data
+  - `framebuffer`: image data
 
   **Returns:**
   List of dictionaries with detection results, each containing:
@@ -256,7 +261,7 @@ from jpeg import Decoder
 
 # Initialize components
 cam = camera.Camera()
-decoder = Decoder()
+decoder = Decoder(pixel_format="RGB888")
 face_detector = FaceDetector()
 
 # Capture and process image
@@ -280,7 +285,7 @@ from jpeg import Decoder
 
 # Initialize components
 cam = camera.Camera()
-decoder = Decoder()
+decoder = Decoder(pixel_format="RGB888")
 recognizer = FaceRecognizer(db_path="/faces.db")
 
 # Enroll a face
